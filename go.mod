@@ -29,4 +29,21 @@ require (
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	// controller v0.0.0
+	// github.com/openkrafter/anytore-backend v0.0.0
+// anytore-backend/controller v0.0.0
+// github.com/openkrafter/anytore-backend/controller v0.0.0
+	// github.com/openkrafter/anytore-backend/controller v0.0.0
 )
+
+// replace github.com/openkrafter/anytore-backend/controller => ../../controller
+// replace github.com/openkrafter/anytore-backend/controller => ./anytore-backend/controller
+// replace github.com/openkrafter/anytore-backend/controller => ./controller
+
+// replace github.com/openkrafter/anytore-backend/testtest => ../testtest
+
+// replace github.com/openkrafter/anytore-backend => ./
+// replace github.com/openkrafter/anytore-backend => ../../
+// replace controller => ./controller
+
+// replace github.com/openkrafter/anytore-backend/controller => ./controller
