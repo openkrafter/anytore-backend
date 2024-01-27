@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -21,8 +20,8 @@ func createTrainingItemSample() model.TrainingItem {
 	trainingItem.Type = "aerobic"
 	trainingItem.Unit = "minute"
 	trainingItem.Kcal = 2
-	trainingItem.CreatedAt = time.Now()
-	trainingItem.UpdatedAt = time.Now()
+	// trainingItem.CreatedAt = time.Now()
+	// trainingItem.UpdatedAt = time.Now()
 
 	return *trainingItem
 }

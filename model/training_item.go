@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 type TrainingItem struct {
 	Id int
 	UserId int
@@ -9,8 +7,6 @@ type TrainingItem struct {
 	Type string
 	Unit string
 	Kcal int
-	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 func (ti *TrainingItem) GetResponse() map[string]interface{} {
