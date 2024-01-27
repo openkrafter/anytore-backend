@@ -13,7 +13,7 @@ type TrainingItem struct {
 	UpdatedAt time.Time
 }
 
-func (ti *TrainingItem) GetResponse() map[string] interface {} {
+func (ti *TrainingItem) GetResponse() map[string]interface{} {
 	res := make(map[string]interface{})
 	res["id"] = ti.Id
 	res["user_id"] = ti.UserId
