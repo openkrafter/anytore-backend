@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/model"
 )
 
@@ -20,8 +20,6 @@ func createTrainingItemSample() model.TrainingItem {
 	trainingItem.Type = "aerobic"
 	trainingItem.Unit = "minute"
 	trainingItem.Kcal = 2
-	// trainingItem.CreatedAt = time.Now()
-	// trainingItem.UpdatedAt = time.Now()
 
 	return *trainingItem
 }
@@ -29,7 +27,7 @@ func createTrainingItemSample() model.TrainingItem {
 func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, error) {
 	searchId, err := attributevalue.Marshal(id)
 	if err != nil {
-		fmt.Println("failed to marshal")
+		logger.Logger.Error("Failed to marshal.", logger.ErrAttr(err))
 		return nil, err
 	}
 	searchKey := map[string]types.AttributeValue{"Id": searchId}
@@ -39,36 +37,33 @@ func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, err
 		Key: searchKey, TableName: &basics.TableName,
     })
 	if err != nil {
-        log.Fatalf("failed to get item, %v", err)
+		logger.Logger.Error("Failed to get TrainingItem.", logger.ErrAttr(err))
 		return nil, err
 	} else {
 		err = attributevalue.UnmarshalMap(response.Item, &trainingItem)
 		if err != nil {
-			log.Printf("Couldn't unmarshal response. Here's why: %v\n", err)
+			logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
 		}
-		log.Printf(trainingItem.Name)
-		log.Printf(trainingItem.Type)
-		log.Printf(trainingItem.Unit)
-		log.Printf("TrainingItem: %v", trainingItem)
+		logger.Logger.Debug("Success to get TrainingItem.", slog.Any("TrainingItem", trainingItem))
 	}
 
 	return trainingItem, nil
 }
 
 func GetTraningItem(id int) model.TrainingItem {
-	fmt.Println("trainingItem id: ", id)
+	logger.Logger.Debug("GetTraningItem process", slog.Int("id", id))
 
-	fmt.Println("Connect DynamoDB")
+	logger.Logger.Debug("Init DynamoDB client.")
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
-		fmt.Println("connect error: DynamoDB")
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return createTrainingItemSample()
 	}
 
-	fmt.Println("Get TraningItem")
+	logger.Logger.Debug("Get TraningItem.")
 	trainingItem, err := basics.getTrainingItemById(id)
 	if err != nil {
-		fmt.Println("get error: TraningItem")
+		logger.Logger.Error("Get TraningItem error.", logger.ErrAttr(err))
 		return createTrainingItemSample()
 	}
 

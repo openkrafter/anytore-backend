@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/openkrafter/anytore-backend/logger"
 )
 
 type TableBasics struct {
@@ -19,8 +19,7 @@ func NewTableBasics(tableName string) (*TableBasics, error) {
 		config.WithRegion("ap-northeast-1"),
 	)
 	if err != nil {
-		// log.Fatalf("unable to load SDK config, %v", err)
-		fmt.Println("error test")
+		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
 		return nil, err
 	}
 

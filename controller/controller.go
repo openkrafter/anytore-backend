@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/service"
 )
 
@@ -14,13 +14,10 @@ func GetTraningItem(c *gin.Context) {
 	trainingItem := service.GetTraningItem(trainingItemId)
 	response := trainingItem.GetResponse()
 	c.JSON(http.StatusOK, response)
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"message": "pong",
-// 	})
 }
 
 func Run() {
-	fmt.Println("Backend Start.")
+	logger.Logger.Debug("Controller thread start.")
 
 	r := gin.Default()
 	r.GET("/training-items/:training-item-id", GetTraningItem)
