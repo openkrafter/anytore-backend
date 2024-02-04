@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	anytoreConfig "github.com/openkrafter/anytore-backend/config"
 	"github.com/openkrafter/anytore-backend/logger"
 )
 
@@ -16,7 +17,7 @@ type TableBasics struct {
 func NewTableBasics(tableName string) (*TableBasics, error) {
 	basics := new(TableBasics)
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("ap-northeast-1"),
+		config.WithRegion(anytoreConfig.Config.AWS_REGION),
 	)
 	if err != nil {
 		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))

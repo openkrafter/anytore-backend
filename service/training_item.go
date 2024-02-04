@@ -39,13 +39,12 @@ func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, err
 	if err != nil {
 		logger.Logger.Error("Failed to get TrainingItem.", logger.ErrAttr(err))
 		return nil, err
-	} else {
-		err = attributevalue.UnmarshalMap(response.Item, &trainingItem)
-		if err != nil {
-			logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
-		}
-		logger.Logger.Debug("Success to get TrainingItem.", slog.Any("TrainingItem", trainingItem))
 	}
+	err = attributevalue.UnmarshalMap(response.Item, &trainingItem)
+	if err != nil {
+		logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
+	}
+	logger.Logger.Debug("Success to get TrainingItem.", slog.Any("TrainingItem", trainingItem))
 
 	return trainingItem, nil
 }
