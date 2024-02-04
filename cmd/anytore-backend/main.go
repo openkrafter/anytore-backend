@@ -1,17 +1,12 @@
 package main
 
 import (
-	"net/http"
+	"github.com/openkrafter/anytore-backend/controller"
 
-	"github.com/gin-gonic/gin"
+	_ "github.com/openkrafter/anytore-backend/config" // init config
+	_ "github.com/openkrafter/anytore-backend/logger" // init logger
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	controller.Run()
 }
