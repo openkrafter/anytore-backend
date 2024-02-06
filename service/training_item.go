@@ -11,19 +11,6 @@ import (
 	"github.com/openkrafter/anytore-backend/model"
 )
 
-// tmp
-func createTrainingItemSample() model.TrainingItem {
-	trainingItem := new(model.TrainingItem)
-	trainingItem.Id = 1
-	trainingItem.UserId = 1
-	trainingItem.Name = "running"
-	trainingItem.Type = "aerobic"
-	trainingItem.Unit = "minute"
-	trainingItem.Kcal = 2
-
-	return *trainingItem
-}
-
 func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, error) {
 	searchId, err := attributevalue.Marshal(id)
 	if err != nil {
@@ -49,22 +36,22 @@ func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, err
 	return trainingItem, nil
 }
 
-func GetTraningItem(id int) model.TrainingItem {
+func GetTraningItem(id int) (*model.TrainingItem, error) {
 	logger.Logger.Debug("GetTraningItem process", slog.Int("id", id))
 
 	logger.Logger.Debug("Init DynamoDB client.")
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
-		return createTrainingItemSample()
+		return nil, err
 	}
 
 	logger.Logger.Debug("Get TraningItem.")
 	trainingItem, err := basics.getTrainingItemById(id)
 	if err != nil {
 		logger.Logger.Error("Get TraningItem error.", logger.ErrAttr(err))
-		return createTrainingItemSample()
+		return nil, err
 	}
 
-	return *trainingItem
+	return trainingItem, nil
 }

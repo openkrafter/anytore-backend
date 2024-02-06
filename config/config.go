@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/openkrafter/anytore-backend/logger"
-	"gopkg.in/yaml.v3"
 )
 
 var Config *AnytoreConfig
@@ -18,16 +17,14 @@ type AnytoreConfig struct {
 func newConfig() (*AnytoreConfig, error) {
 	config := new(AnytoreConfig)
 
-	defaultConfig, err := os.ReadFile("config/defaultConfig.yaml")
-	if err != nil {
-		return nil, err
-	}
-	yaml.Unmarshal(defaultConfig, &config)
-
-	if os.Getenv("GIN_MODE") != "" {
+	// env: GIN_MODE, value: debug or release, default: debug
+	config.GIN_MODE = "debug"
+	if os.Getenv("GIN_MODE") == "debug" || os.Getenv("GIN_MODE") == "release" {
 		config.GIN_MODE = os.Getenv("GIN_MODE")
 	}
 
+	// env: AWS_REGION, value: ap-northeast-1, us-east-1, ..., default: ap-northeast-1
+	config.AWS_REGION = "ap-northeast-1"
 	if os.Getenv("AWS_REGION") != "" {
 		config.AWS_REGION = os.Getenv("AWS_REGION")
 	}
