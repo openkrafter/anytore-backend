@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/openkrafter/anytore-backend/logger"
@@ -39,10 +38,9 @@ func init() {
 	Config, err = newConfig()
 	if err != nil {
 		logger.Logger.Error("Failed to read defaultConfig.yaml.", logger.ErrAttr(err))
+		panic("Failed to start anytore.")
 	}
 	logger.Logger.Debug(Config.GIN_MODE)
 	logger.Logger.Debug(Config.AWS_REGION)
-	fmt.Printf("type %T", Config.AWS_REGION)
-
 	logger.Logger.Debug("config: ", Config)
 }
