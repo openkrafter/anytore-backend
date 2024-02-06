@@ -3,8 +3,6 @@ package logger
 import (
 	"log/slog"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 var Logger *slog.Logger
@@ -19,13 +17,10 @@ func ErrAttr(err error) slog.Attr {
 
 func init() {
 	logConfig := new(LogConfig)
-	defaultConfig, err := os.ReadFile("config/defaultConfig.yaml")
-	if err != nil {
-		slog.Error("Failed to read defaultConfig.yaml.", ErrAttr(err))
-	}
-	yaml.Unmarshal(defaultConfig, &logConfig)
 
-	if os.Getenv("LOG_LEVEL") != "" {
+	// env: LOG_LEVEL, value: debug or info, default: debug
+	logConfig.LOG_LEVEL = "debug"
+	if os.Getenv("LOG_LEVEL") == "debug" || os.Getenv("LOG_LEVEL") == "info" {
 		logConfig.LOG_LEVEL = os.Getenv("LOG_LEVEL")
 	}
 

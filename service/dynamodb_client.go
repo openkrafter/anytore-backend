@@ -9,6 +9,8 @@ import (
 	"github.com/openkrafter/anytore-backend/logger"
 )
 
+var DynamoDbClient *dynamodb.Client
+
 type TableBasics struct {
 	DynamoDbClient *dynamodb.Client
 	TableName      string
@@ -16,16 +18,22 @@ type TableBasics struct {
 
 func NewTableBasics(tableName string) (*TableBasics, error) {
 	basics := new(TableBasics)
+	basics.DynamoDbClient = DynamoDbClient
+	basics.TableName = tableName
+
+	return basics, nil
+}
+
+func init() {
+	logger.Logger.Debug("Init DynamoDB client.")
+
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(anytoreConfig.Config.AWS_REGION),
 	)
 	if err != nil {
 		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
-		return nil, err
+		panic("Failed to start anytore.")
 	}
 
-	basics.DynamoDbClient = dynamodb.NewFromConfig(cfg)
-	basics.TableName = tableName
-
-	return basics, nil
+	DynamoDbClient = dynamodb.NewFromConfig(cfg)
 }
