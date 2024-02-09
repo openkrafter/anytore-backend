@@ -1,4 +1,4 @@
-package service
+package dynamodb
 
 import (
 	"context"
@@ -10,19 +10,6 @@ import (
 )
 
 var DynamoDbClient *dynamodb.Client
-
-type TableBasics struct {
-	DynamoDbClient *dynamodb.Client
-	TableName      string
-}
-
-func NewTableBasics(tableName string) (*TableBasics, error) {
-	basics := new(TableBasics)
-	basics.DynamoDbClient = DynamoDbClient
-	basics.TableName = tableName
-
-	return basics, nil
-}
 
 func init() {
 	logger.Logger.Debug("Init DynamoDB client.")
