@@ -9,6 +9,9 @@ on:
 env:
   AWS_REGION: ap-northeast-1
 
+permissions:
+  id-token: write
+
 jobs:
   BuildImage:
     runs-on: ubuntu-22.04
