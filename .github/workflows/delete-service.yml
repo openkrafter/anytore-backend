@@ -1,5 +1,5 @@
 name: Delete App Runner service
-run-name: Execute terraform and create App Runner service
+run-name: Execute terraform and delete App Runner service
 
 on: [ workflow_dispatch ]
 
@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 jobs:
-  CreateService:
+  DeleteService:
     runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
@@ -29,5 +29,5 @@ jobs:
         working-directory: ./platform/aws
 
       - name: Destroy terraform
-        run: terraform destroy -force
+        run: terraform apply -destroy -auto-approve
         working-directory: ./platform/aws
