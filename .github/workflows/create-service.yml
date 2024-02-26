@@ -22,9 +22,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Init terraform
-        run: terraform init \
-               -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
-               -backend-config="key=${{ secrets.TFSTATE_NAME }}"
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
+            -backend-config="key=${{ secrets.TFSTATE_NAME }}"
         working-directory: ./platform/aws
 
       - name: Apply terraform

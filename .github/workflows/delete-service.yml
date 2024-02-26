@@ -24,8 +24,8 @@ jobs:
       - name: Init terraform
         run: |
           terraform init \
-          -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
-          -backend-config="key=${{ secrets.TFSTATE_NAME }}"
+            -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
+            -backend-config="key=${{ secrets.TFSTATE_NAME }}"
         working-directory: ./platform/aws
 
       - name: Destroy terraform
