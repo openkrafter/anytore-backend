@@ -1,0 +1,33 @@
+name: Create App Runner service
+run-name: Execute terraform and create App Runner service
+
+on: [ workflow_dispatch ]
+
+env:
+  AWS_REGION: ap-northeast-1
+
+permissions:
+  id-token: write
+
+jobs:
+  CreateService:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GH_ACTION_ROLE_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Init terraform
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
+          -backend-config="key=${{ secrets.TFSTATE_NAME }}"
+        working-directory: ./platform/aws
+
+      - name: Destroy terraform
+        run: terraform destroy -force
+        working-directory: ./platform/aws
