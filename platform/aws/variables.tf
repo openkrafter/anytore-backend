@@ -12,3 +12,8 @@ variable "image_tag" {
   type    = string
   default = "nothing"
 }
+
+variable "service_name" {
+  type    = string
+  default = "nothing"
+}
