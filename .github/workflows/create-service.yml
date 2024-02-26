@@ -25,7 +25,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.TFSTATE_BUCKET_NAME }}" \
-            -backend-config="key=${{ secrets.TFSTATE_NAME }}"
+            -backend-config="key=terraform-${{ secrets.ENVIRONMENT }}.tfstate"
         working-directory: ./platform/aws
 
       - name: Apply terraform
@@ -34,5 +34,5 @@ jobs:
           TF_VAR_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_repository_name: ${{ secrets.REPOSITORY }}
           TF_VAR_image_tag: ${{ secrets.RELEASE_IMAGE_TAG }}
-          TF_VAR_service_name: ${{ secrets.SERVICE_NAME }}
+          TF_VAR_service_name: anytore-backend-${{ secrets.ENVIRONMENT }}
         working-directory: ./platform/aws
