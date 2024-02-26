@@ -1,0 +1,32 @@
+name: Create App Runner service
+run-name: Execute terraform and create App Runner service
+
+on: [ workflow_dispatch ]
+
+env:
+  AWS_REGION: ap-northeast-1
+
+permissions:
+  id-token: write
+
+jobs:
+  BuildImage:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GH_ACTION_ROLE_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Execute terraform
+        - run: terraform init
+          working-directory: ./platform/aws
+        - run: terraform apply -auto-approve
+          env:
+            TF_VAR_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+            TF_VAR_repository_name: ${{ secrets.REPOSITORY }}
+            TF_VAR_image_tag: ${{ secrets.RELEASE_IMAGE_TAG }}
+          working-directory: ./platform/aws
