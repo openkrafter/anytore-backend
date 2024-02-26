@@ -1,4 +1,4 @@
-name: Create App Runner service
+name: Delete App Runner service
 run-name: Execute terraform and create App Runner service
 
 on: [ workflow_dispatch ]
