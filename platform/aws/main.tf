@@ -8,14 +8,18 @@ terraform {
   }
 
   required_version = ">= 1.2.0"
+
+  backend "s3" {
+    region = "ap-northeast-1"
+  }
 }
 
 provider "aws" {
   region = "ap-northeast-1"
 }
 
-resource "aws_apprunner_service" "tfservice1" {
-  service_name = "tfservice1"
+resource "aws_apprunner_service" "anytore-backend" {
+  service_name = var.service_name
 
   source_configuration {
     image_repository {
