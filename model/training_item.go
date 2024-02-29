@@ -1,12 +1,12 @@
 package model
 
 type TrainingItem struct {
-	Id int
-	UserId int
-	Name string
-	Type string
-	Unit string
-	Kcal int
+	Id int `json:"id"`
+	UserId int `json:"user_id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Unit string `json:"unit"`
+	Kcal int `json:"kcal"`
 }
 
 func (ti *TrainingItem) GetResponse() map[string]interface{} {

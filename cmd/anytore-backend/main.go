@@ -1,13 +1,17 @@
 package main
 
 import (
+	"github.com/openkrafter/anytore-backend/config"
 	"github.com/openkrafter/anytore-backend/controller"
+	"github.com/openkrafter/anytore-backend/logger"
 
-	_ "github.com/openkrafter/anytore-backend/config"   // init config
-	_ "github.com/openkrafter/anytore-backend/dynamodb" // init DynamoDB client
-	_ "github.com/openkrafter/anytore-backend/logger"   // init logger
+	"github.com/openkrafter/anytore-backend/dynamodb" // init DynamoDB client
 )
 
 func main() {
+	logger.InitLogger()
+	config.InitConfig()
+	dynamodb.InitDynamoDbClient()
+
 	controller.Run()
 }
