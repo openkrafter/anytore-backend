@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/openkrafter/anytore-backend/logger"
@@ -24,9 +25,8 @@ func newConfig() *AnytoreConfig {
 	return config
 }
 
-func init() {
+func InitConfig() {
 	logger.Logger.Debug("Init config.")
-
 	Config := newConfig()
-	logger.Logger.Debug("config: ", Config)
+	logger.Logger.Debug("config: ", slog.Any("value ", Config))
 }

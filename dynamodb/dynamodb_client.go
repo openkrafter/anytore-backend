@@ -11,7 +11,7 @@ import (
 
 var DynamoDbClient *dynamodb.Client
 
-func init() {
+func InitDynamoDbClient() {
 	logger.Logger.Debug("Init DynamoDB client.")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())

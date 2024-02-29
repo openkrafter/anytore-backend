@@ -15,7 +15,7 @@ func ErrAttr(err error) slog.Attr {
 	return slog.Any("error", err)
 }
 
-func init() {
+func InitLogger() {
 	logConfig := new(LogConfig)
 
 	// env: LOG_LEVEL, value: debug or info, default: debug
@@ -38,4 +38,5 @@ func init() {
 	Logger = slog.New(slog.NewJSONHandler(os.Stdout, &ops))
 	slog.SetDefault(Logger)
 	Logger.Debug("Init logger.")
+
 }
