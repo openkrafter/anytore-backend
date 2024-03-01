@@ -47,3 +47,96 @@ func TestGetTraningItem(t *testing.T) {
 		})
 	}
 }
+
+func TestGetIncrementId(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    reflect.Type
+		wantErr bool
+	}{
+		{
+			name: "case1",
+			want: reflect.TypeOf(1),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			incrementId, err := GetIncrementId()
+			got := reflect.TypeOf(incrementId)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetIncrementId() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetIncrementId() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUpdateTraningItem(t *testing.T) {
+	type args struct {
+		input *model.TrainingItem
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "case1",
+			args: args{input: &model.TrainingItem{
+				Id:     1,
+				UserId: 1,
+				Name:   "ランニング",
+				Type:   "aerobic",
+				Unit:   "hour",
+				Kcal:   150,
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := UpdateTraningItem(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestDeleteTraningItem(t *testing.T) {
+	type args struct {
+		id int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		dynamoInput *model.TrainingItem
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "case1",
+			args: args{id: 1},
+			dynamoInput: &model.TrainingItem{
+				Id:     1,
+				UserId: 1,
+				Name:   "ランニング",
+				Type:   "aerobic",
+				Unit:   "hour",
+				Kcal:   150,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testenvironment.SetupTraningItemTestData(tt.dynamoInput)
+			defer testenvironment.TeardownTraningItemTestData(tt.dynamoInput.Id)
+
+			if err := DeleteTraningItem(tt.args.id); (err != nil) != tt.wantErr {
+				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
