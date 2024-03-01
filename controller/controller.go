@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -26,6 +27,17 @@ func SampleTraningItem(c *gin.Context) {
 }
 
 func ListTraningItem(c *gin.Context) {
+	trainingItems, err := service.GetTraningItems()
+	if err != nil {
+		logger.Logger.Error("ListTraningItem Failed.", logger.ErrAttr(err))
+		return
+	}
+	var response []map[string]interface{}
+	for _, trainingItem := range trainingItems {
+		response = append(response, trainingItem.GetResponse())
+	}
+	log.Println(response)
+	c.JSON(http.StatusOK, response)
 }
 
 func GetTraningItem(c *gin.Context) {
@@ -99,7 +111,6 @@ func UpdateTraningItem(c *gin.Context) {
 		return
 	}
 
-	// c.JSON(http.StatusCreated, "Success to update.")
 	c.JSON(http.StatusCreated, requestBody.GetResponse())
 }
 
@@ -123,6 +134,7 @@ func Run() {
 
 	r := gin.Default()
 	r.GET("/sample", SampleTraningItem) // for debug
+	r.GET("/training-items", ListTraningItem)
 	r.GET("/training-items/:training-item-id", GetTraningItem)
 	r.POST("/training-items", CreateTraningItem)
 	r.PUT("/training-items/:training-item-id", UpdateTraningItem)

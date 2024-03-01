@@ -1,12 +1,75 @@
 package service
 
 import (
+	"log"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/openkrafter/anytore-backend/model"
 	testenvironment "github.com/openkrafter/anytore-backend/test-environment"
 )
+
+func TestGetTraningItems(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    []*model.TrainingItem
+		wantErr bool
+	}{
+		{
+			name: "case1",
+			want: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+				{
+					Id:     2,
+					UserId: 2,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   100,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, trainingItem := range tt.want {
+				testenvironment.SetupTraningItemTestData(trainingItem)
+				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
+			}
+
+			got, err := GetTraningItems()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			sort.Slice(got, func(i, j int) bool {
+				compA := *got[i]
+				compB := *got[j]
+				return compA.Id < compB.Id
+			})
+
+			if !reflect.DeepEqual(got, tt.want) {
+				for _, trainingItem := range got {
+					log.Println(trainingItem)
+				}
+				for _, trainingItem := range tt.want {
+					log.Println(trainingItem)
+				}
+
+				t.Errorf("GetTraningItems() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func TestGetTraningItem(t *testing.T) {
 	type args struct {
@@ -110,10 +173,10 @@ func TestDeleteTraningItem(t *testing.T) {
 		id int
 	}
 	tests := []struct {
-		name    string
-		args    args
+		name        string
+		args        args
 		dynamoInput *model.TrainingItem
-		wantErr bool
+		wantErr     bool
 	}{
 		// TODO: Add test cases.
 		{

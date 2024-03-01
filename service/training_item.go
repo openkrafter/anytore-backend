@@ -39,7 +39,31 @@ func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, err
 }
 
 func GetTraningItems() ([]*model.TrainingItem, error) {
-	return nil, nil
+	basics, err := NewTableBasics("TrainingItem")
+	if err != nil {
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
+		return nil, err
+	}
+
+	response, err := basics.DynamoDbClient.Scan(context.TODO(), &dynamodb.ScanInput{
+		TableName: &basics.TableName,
+	})	
+	if err != nil {
+		logger.Logger.Error("Failed to scan TrainingItem.", logger.ErrAttr(err))
+		return nil, err
+	}
+
+	var trainingItems []*model.TrainingItem
+	for _, item := range response.Items {
+		var trainingItem model.TrainingItem
+		err = attributevalue.UnmarshalMap(item, &trainingItem)
+		if err != nil {
+			logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
+		}
+		trainingItems = append(trainingItems, &trainingItem)
+	}
+
+	return trainingItems, nil
 }
 
 func GetTraningItem(id int) (*model.TrainingItem, error) {

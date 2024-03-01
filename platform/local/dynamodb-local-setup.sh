@@ -17,3 +17,8 @@ aws dynamodb create-table \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
   --table-class "STANDARD" \
   --no-deletion-protection-enabled
+
+aws dynamodb put-item \
+  --endpoint-url http://localhost:8000 \
+  --table-name TrainingItemCounter \
+  --item '{ "CountKey": {"S": "key"}, "CountNumber": {"N": "0"} }'
