@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -23,7 +26,7 @@ func setup() error {
 	testenvironment.SetupDynamoDbClient()
 
 	go Run()
-    time.Sleep(10 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	return nil
 }
@@ -47,12 +50,116 @@ func TestMain(m *testing.M) {
 	os.Exit(ret)
 }
 
+func TestGetTraningItems(t *testing.T) {
+	tests := []struct {
+		name        string
+		dynamoInput []*model.TrainingItem
+		url         string
+		want		map[string]interface{}
+		wantErr     bool
+	}{
+		{
+			name: "case1",
+			dynamoInput: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+				{
+					Id:     2,
+					UserId: 2,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   100,
+				},
+			},
+			url: "http://localhost:8080/training-items",
+			want: map[string]interface{}{
+				"status": http.StatusOK,
+				"body": []*model.TrainingItem{
+					{
+						Id:     1,
+						UserId: 1,
+						Name:   "ランニング",
+						Type:   "aerobic",
+						Unit:   "hour",
+						Kcal:   150,
+					},
+					{
+						Id:     2,
+						UserId: 2,
+						Name:   "ウォーキング",
+						Type:   "aerobic",
+						Unit:   "hour",
+						Kcal:   100,
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, trainingItem := range tt.dynamoInput {
+				testenvironment.SetupTraningItemTestData(trainingItem)
+				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
+			}
+
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			req, err := http.NewRequest("GET", tt.url, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			res, err := client.Do(req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			defer res.Body.Close()
+
+			body, err := io.ReadAll(res.Body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			log.Println(string(body))
+			got := map[string]interface{}{
+				"status": res.StatusCode,
+				"body": []*model.TrainingItem{},
+			}
+			var gotBody []*model.TrainingItem
+			json.Unmarshal(body, &gotBody)
+
+			sort.Slice(gotBody, func(i, j int) bool {
+				return gotBody[i].Id < gotBody[j].Id 
+			})
+			got["body"] = gotBody
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetTraningItem API = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGetTraningItem(t *testing.T) {
 	tests := []struct {
-		name string
+		name        string
 		dynamoInput *model.TrainingItem
-		url string
-		wantErr bool
+		url         string
+		want		map[string]interface{}
+		wantErr     bool
 	}{
 		{
 			name: "case1",
@@ -65,6 +172,17 @@ func TestGetTraningItem(t *testing.T) {
 				Kcal:   150,
 			},
 			url: "http://localhost:8080/training-items/1",
+			want: map[string]interface{}{
+				"status": http.StatusOK,
+				"body": &model.TrainingItem{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -72,30 +190,261 @@ func TestGetTraningItem(t *testing.T) {
 			testenvironment.SetupTraningItemTestData(tt.dynamoInput)
 			defer testenvironment.TeardownTraningItemTestData(tt.dynamoInput.Id)
 
-			resp, err := http.Get(tt.url)
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			req, err := http.NewRequest("GET", tt.url, nil)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			defer resp.Body.Close()
 
-			body, err := io.ReadAll(resp.Body)
+			res, err := client.Do(req)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			var got map[string]interface{}
-			json.Unmarshal(body, &got)
+			defer res.Body.Close()
 
-			var want map[string]interface{}
-			wantBytes, err := json.Marshal(tt.dynamoInput)
+			body, err := io.ReadAll(res.Body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got := map[string]interface{}{
+				"status": res.StatusCode,
+				"body": &model.TrainingItem{},
+			}
+			json.Unmarshal(body, got["body"])
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetTraningItem API = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCreateTraningItem(t *testing.T) {
+	tests := []struct {
+		name        string
+		dynamoInput *model.TrainingItem
+		url         string
+		want		map[string]interface{}
+		wantErr     bool
+	}{
+		{
+			name: "case1",
+			dynamoInput: &model.TrainingItem{
+				UserId: 1,
+				Name:   "ランニング",
+				Type:   "aerobic",
+				Unit:   "hour",
+				Kcal:   150,
+			},
+			url: "http://localhost:8080/training-items",
+			want: map[string]interface{}{
+				"status": http.StatusCreated,
+				"body": &model.TrainingItem{
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			requestBody, err := json.Marshal(tt.dynamoInput)
 			if err != nil {
 				logger.Logger.Error("Failed to marshal.", logger.ErrAttr(err))
+				return
 			}
-			json.Unmarshal(wantBytes, &want)
 
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("GetTraningItem() = %v, want %v", got, want)
+			req, err := http.NewRequest(
+				"POST",
+				tt.url,
+				bytes.NewBuffer(requestBody))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			res, err := client.Do(req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			defer res.Body.Close()
+
+			body, err := io.ReadAll(res.Body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got := map[string]interface{}{
+				"status": res.StatusCode,
+				"body": &model.TrainingItem{},
+			}
+			json.Unmarshal(body, got["body"])
+
+			gotBody := got["body"].(*model.TrainingItem)
+			wantBody := tt.want["body"].(*model.TrainingItem)
+			wantBody.Id = gotBody.Id
+			defer testenvironment.TeardownTraningItemTestData(gotBody.Id)
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CreateTraningItem API = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUpdateTraningItem(t *testing.T) {
+	tests := []struct {
+		name        string
+		dynamoInput *model.TrainingItem
+		url         string
+		want		map[string]interface{}
+		wantErr     bool
+	}{
+		{
+			name: "case1",
+			dynamoInput: &model.TrainingItem{
+				Id:     1,
+				UserId: 1,
+				Name:   "ランニング",
+				Type:   "aerobic",
+				Unit:   "hour",
+				Kcal:   150,
+			},
+			url: "http://localhost:8080/training-items/1",
+			want: map[string]interface{}{
+				"status": http.StatusCreated,
+				"body": &model.TrainingItem{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer testenvironment.TeardownTraningItemTestData(tt.dynamoInput.Id)
+
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			requestBody, err := json.Marshal(tt.dynamoInput)
+			if err != nil {
+				logger.Logger.Error("Failed to marshal.", logger.ErrAttr(err))
+				return
+			}
+
+			req, err := http.NewRequest(
+				"PUT",
+				tt.url,
+				bytes.NewBuffer(requestBody))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			res, err := client.Do(req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			defer res.Body.Close()
+
+			body, err := io.ReadAll(res.Body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got := map[string]interface{}{
+				"status": res.StatusCode,
+				"body": &model.TrainingItem{},
+			}
+			json.Unmarshal(body, got["body"])
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DeleteTraningItem API = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestDeleteTraningItem(t *testing.T) {
+	tests := []struct {
+		name        string
+		dynamoInput *model.TrainingItem
+		url         string
+		want		map[string]interface{}
+		wantErr     bool
+	}{
+		{
+			name: "case1",
+			dynamoInput: &model.TrainingItem{
+				Id:     1,
+				UserId: 1,
+				Name:   "ランニング",
+				Type:   "aerobic",
+				Unit:   "hour",
+				Kcal:   150,
+			},
+			url: "http://localhost:8080/training-items/1",
+			want: map[string]interface{}{
+				"status": http.StatusNoContent,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testenvironment.SetupTraningItemTestData(tt.dynamoInput)
+			defer testenvironment.TeardownTraningItemTestData(tt.dynamoInput.Id)
+
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			req, err := http.NewRequest("DELETE", tt.url, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			res, err := client.Do(req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteTraningItem API error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			defer res.Body.Close()
+
+			got := map[string]interface{}{
+				"status": res.StatusCode,
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DeleteTraningItem API = %v, want %v", got, tt.want)
 			}
 		})
 	}
