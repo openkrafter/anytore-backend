@@ -7,7 +7,22 @@ aws dynamodb create-table \
   --key-schema AttributeName=Id,KeyType=HASH \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
   --table-class "STANDARD" \
-  --no-deletion-protection-enabled
+  --no-deletion-protection-enabled \
+  --global-secondary-indexes \
+    "[{\"Create\":{\"IndexName\": \"UserIdIndex\", \
+                  \"KeySchema\":[{\"AttributeName\":\"UserId\",\"KeyType\":\"HASH\"}], \
+                  \"Projection\":{\"ProjectionType\":\"ALL\"}, \
+                  \"ProvisionedThroughput\": {\"ReadCapacityUnits\": 1, \"WriteCapacityUnits\": 1}}}]"
+
+# aws dynamodb update-table \
+#   --endpoint-url http://localhost:8000 \
+#   --table-name TrainingItem \
+#   --attribute-definitions AttributeName=UserId,AttributeType=N \
+#   --global-secondary-index-updates \
+#       "[{\"Create\":{\"IndexName\": \"UserIdIndex\", \
+#                     \"KeySchema\":[{\"AttributeName\":\"UserId\",\"KeyType\":\"HASH\"}], \
+#                     \"Projection\":{\"ProjectionType\":\"ALL\"}, \
+#                     \"ProvisionedThroughput\": {\"ReadCapacityUnits\": 1, \"WriteCapacityUnits\": 1}}}]"
 
 aws dynamodb create-table \
   --endpoint-url http://localhost:8000 \

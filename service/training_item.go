@@ -7,50 +7,60 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/openkrafter/anytore-backend/customerror"
 	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/model"
 )
 
-func (basics *TableBasics) getTrainingItemById(id int) (*model.TrainingItem, error) {
-	searchId, err := attributevalue.Marshal(id)
-	if err != nil {
-		logger.Logger.Error("Failed to marshal.", logger.ErrAttr(err))
-		return nil, err
-	}
-	searchKey := map[string]types.AttributeValue{"Id": searchId}
-
-	trainingItem := new(model.TrainingItem)
-	response, err := basics.DynamoDbClient.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		Key: searchKey, TableName: &basics.TableName,
-    })
-	if err != nil {
-		logger.Logger.Error("Failed to get TrainingItem.", logger.ErrAttr(err))
-		return nil, err
-	}
-	err = attributevalue.UnmarshalMap(response.Item, &trainingItem)
-	if err != nil {
-		logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
-	}
-	logger.Logger.Debug("Success to get TrainingItem.", slog.Any("TrainingItem", trainingItem))
-
-	return trainingItem, nil
-}
-
-func GetTraningItems() ([]*model.TrainingItem, error) {
+func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return nil, err
 	}
 
-	response, err := basics.DynamoDbClient.Scan(context.TODO(), &dynamodb.ScanInput{
-		TableName: &basics.TableName,
-	})	
+	keyCond := expression.Key("UserId").Equal(expression.Value(userId))
+	proj := expression.NamesList(
+		expression.Name("Id"),
+		expression.Name("UserId"),
+		expression.Name("Name"),
+		expression.Name("Type"),
+		expression.Name("Unit"),
+		expression.Name("Kcal"),
+	)
+	
+	builder := expression.NewBuilder().
+		WithKeyCondition(keyCond).
+		WithProjection(proj)
+	expr, err := builder.Build()
 	if err != nil {
-		logger.Logger.Error("Failed to scan TrainingItem.", logger.ErrAttr(err))
+		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
+	}
+	
+	queryInput := &dynamodb.QueryInput{
+		KeyConditionExpression: expr.KeyCondition(),
+		ProjectionExpression: expr.Projection(),
+		ExpressionAttributeNames: expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName: &basics.TableName,
+		IndexName: aws.String("UserIdIndex"),
+	}
+
+	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
+	if err != nil {
+		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
+		return nil, err
+	}
+
+	if len(response.Items) == 0 {
+		logger.Logger.Info("No items matched.")
+		return nil, nil
+	} else {
+		logger.Logger.Debug("Query succeeded.")
 	}
 
 	var trainingItems []*model.TrainingItem
@@ -66,7 +76,7 @@ func GetTraningItems() ([]*model.TrainingItem, error) {
 	return trainingItems, nil
 }
 
-func GetTraningItem(id int) (*model.TrainingItem, error) {
+func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 	logger.Logger.Debug("GetTraningItem process", slog.Int("id", id))
 
 	logger.Logger.Debug("Init DynamoDB client.")
@@ -77,11 +87,56 @@ func GetTraningItem(id int) (*model.TrainingItem, error) {
 	}
 
 	logger.Logger.Debug("Get TraningItem.")
-	trainingItem, err := basics.getTrainingItemById(id)
+	keyCond := expression.Key("UserId").Equal(expression.Value(userId))
+	filter := expression.Name("Id").Equal(expression.Value(id))
+	proj := expression.NamesList(
+		expression.Name("Id"),
+		expression.Name("UserId"),
+		expression.Name("Name"),
+		expression.Name("Type"),
+		expression.Name("Unit"),
+		expression.Name("Kcal"),
+	)
+	
+	builder := expression.NewBuilder().
+		WithKeyCondition(keyCond).
+		WithFilter(filter).
+		WithProjection(proj)
+	expr, err := builder.Build()
 	if err != nil {
-		logger.Logger.Error("Get TraningItem error.", logger.ErrAttr(err))
+		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
 	}
+	
+	queryInput := &dynamodb.QueryInput{
+		KeyConditionExpression: expr.KeyCondition(),
+		FilterExpression: expr.Filter(),
+		ProjectionExpression: expr.Projection(),
+		ExpressionAttributeNames: expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName: &basics.TableName,
+		IndexName: aws.String("UserIdIndex"),
+	}
+
+	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
+	if err != nil {
+		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
+		return nil, err
+	}
+	if len(response.Items) == 0 {
+		logger.Logger.Info("No items matched.")
+		return nil, nil
+	} else {
+		logger.Logger.Debug("Query succeeded.")
+	}
+
+	trainingItem := new(model.TrainingItem)
+	err = attributevalue.UnmarshalMap(response.Items[0], &trainingItem)
+	if err != nil {
+		logger.Logger.Error("Failed to unmarshal response.", logger.ErrAttr(err))
+	}
+
+	logger.Logger.Debug("Success to get TrainingItem.", slog.Any("TrainingItem", trainingItem))
 
 	return trainingItem, nil
 }
@@ -133,7 +188,7 @@ func GetIncrementId() (int, error) {
 	return int(updatedAttributes.CountNumber), nil
 }
 
-func UpdateTraningItem(input *model.TrainingItem) error {
+func CreateTraningItem(input *model.TrainingItem) error {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
@@ -154,11 +209,51 @@ func UpdateTraningItem(input *model.TrainingItem) error {
 	return nil
 }
 
-func DeleteTraningItem(id int) error {
+func UpdateTraningItem(input *model.TrainingItem, userId int) error {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return err
+	}
+
+	trainingItem, err := GetTraningItem(input.Id, userId)
+	if err != nil {
+		return err
+	}
+	if trainingItem == nil {
+		error404 := customerror.NewError404()
+		return &error404
+	}
+
+	av, err := attributevalue.MarshalMap(input)
+	if err != nil {
+		return err
+	}
+	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(basics.TableName),
+		Item:      av,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteTraningItem(id int, userId int) error {
+	basics, err := NewTableBasics("TrainingItem")
+	if err != nil {
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
+		return err
+	}
+
+	trainingItem, err := GetTraningItem(id, userId)
+	if err != nil {
+		return err
+	}
+	if trainingItem == nil {
+		error404 := customerror.NewError404()
+		return &error404
 	}
 
 	deleteInput := &dynamodb.DeleteItemInput{
