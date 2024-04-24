@@ -16,11 +16,11 @@ import (
 	"github.com/openkrafter/anytore-backend/model"
 )
 
-type resolverV2 struct {}
+type resolverV2 struct{}
 
 func (*resolverV2) ResolveEndpoint(ctx context.Context, params dynamodb.EndpointParameters) (
 	smithyendpoints.Endpoint, error,
-	) {
+) {
 	u, err := url.Parse("http://localhost:8000")
 	if err != nil {
 		return smithyendpoints.Endpoint{}, err
@@ -38,9 +38,9 @@ func SetupDynamoDbClient() error {
 		return err
 	}
 
-	anytoreDynamodb.DynamoDbClient = dynamodb.NewFromConfig(cfg, func (o *dynamodb.Options) {
-        o.EndpointResolverV2 = &resolverV2{}
-    })
+	anytoreDynamodb.DynamoDbClient = dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
+		o.EndpointResolverV2 = &resolverV2{}
+	})
 
 	return nil
 }

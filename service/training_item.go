@@ -31,7 +31,7 @@ func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
 		expression.Name("Unit"),
 		expression.Name("Kcal"),
 	)
-	
+
 	builder := expression.NewBuilder().
 		WithKeyCondition(keyCond).
 		WithProjection(proj)
@@ -40,14 +40,14 @@ func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
 		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
 	}
-	
+
 	queryInput := &dynamodb.QueryInput{
-		KeyConditionExpression: expr.KeyCondition(),
-		ProjectionExpression: expr.Projection(),
-		ExpressionAttributeNames: expr.Names(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ProjectionExpression:      expr.Projection(),
+		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
-		TableName: &basics.TableName,
-		IndexName: aws.String("UserIdIndex"),
+		TableName:                 &basics.TableName,
+		IndexName:                 aws.String("UserIdIndex"),
 	}
 
 	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
@@ -97,7 +97,7 @@ func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 		expression.Name("Unit"),
 		expression.Name("Kcal"),
 	)
-	
+
 	builder := expression.NewBuilder().
 		WithKeyCondition(keyCond).
 		WithFilter(filter).
@@ -107,15 +107,15 @@ func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
 	}
-	
+
 	queryInput := &dynamodb.QueryInput{
-		KeyConditionExpression: expr.KeyCondition(),
-		FilterExpression: expr.Filter(),
-		ProjectionExpression: expr.Projection(),
-		ExpressionAttributeNames: expr.Names(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
-		TableName: &basics.TableName,
-		IndexName: aws.String("UserIdIndex"),
+		TableName:                 &basics.TableName,
+		IndexName:                 aws.String("UserIdIndex"),
 	}
 
 	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
@@ -149,7 +149,7 @@ func GetIncrementId() (int, error) {
 	}
 
 	type TrainingItemCounter struct {
-		CountKey string
+		CountKey    string
 		CountNumber int
 	}
 
@@ -167,11 +167,11 @@ func GetIncrementId() (int, error) {
 	}
 
 	result, err := basics.DynamoDbClient.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-		TableName: aws.String("TrainingItemCounter"),
-		Key: countKey,
-		UpdateExpression: aws.String(updateExpression),
+		TableName:                 aws.String("TrainingItemCounter"),
+		Key:                       countKey,
+		UpdateExpression:          aws.String(updateExpression),
 		ExpressionAttributeValues: incrementExp,
-		ReturnValues: types.ReturnValueUpdatedNew,
+		ReturnValues:              types.ReturnValueUpdatedNew,
 	})
 	if err != nil {
 		logger.Logger.Error("GetIncrementId Failed.", logger.ErrAttr(err))
@@ -272,4 +272,3 @@ func DeleteTraningItem(id int, userId int) error {
 
 	return nil
 }
-

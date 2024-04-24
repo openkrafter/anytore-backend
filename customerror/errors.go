@@ -7,18 +7,18 @@ import (
 
 type Error404 struct {
 	ErrorCode int
-	Body map[string]string
+	Body      map[string]string
 }
 
 func (e *Error404) Error() string {
-    return fmt.Sprintf("404 Not Found: %s", e.Body["message"])
+	return fmt.Sprintf("404 Not Found: %s", e.Body["message"])
 }
 
 func NewError404() Error404 {
 	return Error404{
 		ErrorCode: http.StatusNotFound,
 		Body: map[string]string{
-			"status": "error",
+			"status":  "error",
 			"message": "Resource not found",
 		},
 	}

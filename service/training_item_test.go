@@ -7,18 +7,25 @@ import (
 	"testing"
 
 	"github.com/openkrafter/anytore-backend/model"
-	testenvironment "github.com/openkrafter/anytore-backend/test-environment"
+	testenvironment "github.com/openkrafter/anytore-backend/test/environment"
 )
 
+// TODO: Add test cases.
+
 func TestGetTraningItems(t *testing.T) {
+	type args struct {
+		userId int
+	}
 	tests := []struct {
-		name    string
-		want    []*model.TrainingItem
-		wantErr bool
+		name            string
+		setupDynamoData []*model.TrainingItem
+		args            args
+		want            []*model.TrainingItem
+		wantErr         bool
 	}{
 		{
 			name: "case1",
-			want: []*model.TrainingItem{
+			setupDynamoData: []*model.TrainingItem{
 				{
 					Id:     1,
 					UserId: 1,
@@ -26,6 +33,14 @@ func TestGetTraningItems(t *testing.T) {
 					Type:   "aerobic",
 					Unit:   "hour",
 					Kcal:   150,
+				},
+				{
+					Id:     3,
+					UserId: 1,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   90,
 				},
 				{
 					Id:     2,
@@ -36,16 +51,35 @@ func TestGetTraningItems(t *testing.T) {
 					Kcal:   100,
 				},
 			},
+			args: args{userId: 1},
+			want: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+				{
+					Id:     3,
+					UserId: 1,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   90,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			for _, trainingItem := range tt.want {
+			for _, trainingItem := range tt.setupDynamoData {
 				testenvironment.SetupTraningItemTestData(trainingItem)
 				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
 			}
 
-			got, err := GetTraningItems()
+			got, err := GetTraningItems(tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -73,17 +107,37 @@ func TestGetTraningItems(t *testing.T) {
 
 func TestGetTraningItem(t *testing.T) {
 	type args struct {
-		id int
+		id     int
+		userId int
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *model.TrainingItem
-		wantErr bool
+		name            string
+		setupDynamoData []*model.TrainingItem
+		args            args
+		want            *model.TrainingItem
+		wantErr         bool
 	}{
 		{
 			name: "case1",
-			args: args{id: 1},
+			setupDynamoData: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+				{
+					Id:     2,
+					UserId: 2,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   100,
+				},
+			},
+			args: args{id: 1, userId: 1},
 			want: &model.TrainingItem{
 				Id:     1,
 				UserId: 1,
@@ -96,10 +150,12 @@ func TestGetTraningItem(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testenvironment.SetupTraningItemTestData(tt.want)
-			defer testenvironment.TeardownTraningItemTestData(tt.want.Id)
+			for _, trainingItem := range tt.setupDynamoData {
+				testenvironment.SetupTraningItemTestData(trainingItem)
+				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
+			}
 
-			got, err := GetTraningItem(tt.args.id)
+			got, err := GetTraningItem(tt.args.id, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -140,28 +196,56 @@ func TestGetIncrementId(t *testing.T) {
 
 func TestUpdateTraningItem(t *testing.T) {
 	type args struct {
-		input *model.TrainingItem
+		input  *model.TrainingItem
+		userId int
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name            string
+		setupDynamoData []*model.TrainingItem
+		args            args
+		wantErr         bool
 	}{
 		{
 			name: "case1",
-			args: args{input: &model.TrainingItem{
-				Id:     1,
-				UserId: 1,
-				Name:   "ランニング",
-				Type:   "aerobic",
-				Unit:   "hour",
-				Kcal:   150,
-			}},
+			setupDynamoData: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   120,
+				},
+				{
+					Id:     2,
+					UserId: 2,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   100,
+				},
+			},
+			args: args{
+				input: &model.TrainingItem{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   150,
+				},
+				userId: 1,
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := UpdateTraningItem(tt.args.input); (err != nil) != tt.wantErr {
+			for _, trainingItem := range tt.setupDynamoData {
+				testenvironment.SetupTraningItemTestData(trainingItem)
+				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
+			}
+
+			if err := UpdateTraningItem(tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -170,34 +254,46 @@ func TestUpdateTraningItem(t *testing.T) {
 
 func TestDeleteTraningItem(t *testing.T) {
 	type args struct {
-		id int
+		id     int
+		userId int
 	}
 	tests := []struct {
-		name        string
-		args        args
-		dynamoInput *model.TrainingItem
-		wantErr     bool
+		name            string
+		setupDynamoData []*model.TrainingItem
+		args            args
+		wantErr         bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "case1",
-			args: args{id: 1},
-			dynamoInput: &model.TrainingItem{
-				Id:     1,
-				UserId: 1,
-				Name:   "ランニング",
-				Type:   "aerobic",
-				Unit:   "hour",
-				Kcal:   150,
+			setupDynamoData: []*model.TrainingItem{
+				{
+					Id:     1,
+					UserId: 1,
+					Name:   "ランニング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   120,
+				},
+				{
+					Id:     2,
+					UserId: 2,
+					Name:   "ウォーキング",
+					Type:   "aerobic",
+					Unit:   "hour",
+					Kcal:   100,
+				},
 			},
+			args: args{id: 1, userId: 1},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testenvironment.SetupTraningItemTestData(tt.dynamoInput)
-			defer testenvironment.TeardownTraningItemTestData(tt.dynamoInput.Id)
+			for _, trainingItem := range tt.setupDynamoData {
+				testenvironment.SetupTraningItemTestData(trainingItem)
+				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
+			}
 
-			if err := DeleteTraningItem(tt.args.id); (err != nil) != tt.wantErr {
+			if err := DeleteTraningItem(tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

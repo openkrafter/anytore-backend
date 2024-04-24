@@ -6,7 +6,7 @@ import (
 
 	anytoreConfig "github.com/openkrafter/anytore-backend/config"
 	"github.com/openkrafter/anytore-backend/logger"
-	testenvironment "github.com/openkrafter/anytore-backend/test-environment"
+	testenvironment "github.com/openkrafter/anytore-backend/test/environment"
 )
 
 func setup() error {
