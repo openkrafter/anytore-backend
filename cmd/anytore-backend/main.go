@@ -5,7 +5,7 @@ import (
 	"github.com/openkrafter/anytore-backend/controller"
 	"github.com/openkrafter/anytore-backend/logger"
 
-	"github.com/openkrafter/anytore-backend/dynamodb" // init DynamoDB client
+	"github.com/openkrafter/anytore-backend/dynamodb"
 )
 
 func main() {

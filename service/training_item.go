@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strconv"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/smithy-go"
 	"github.com/openkrafter/anytore-backend/customerror"
 	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/model"
@@ -160,6 +162,7 @@ func GetIncrementId() (int, error) {
 	}
 
 	updateExpression := "SET CountNumber = CountNumber + :incr"
+	conditionExpression := "attribute_exists(CountNumber)"
 	incrementExp := map[string]types.AttributeValue{
 		":incr": &types.AttributeValueMemberN{
 			Value: "1",
@@ -171,9 +174,30 @@ func GetIncrementId() (int, error) {
 		Key:                       countKey,
 		UpdateExpression:          aws.String(updateExpression),
 		ExpressionAttributeValues: incrementExp,
+		ConditionExpression:       aws.String(conditionExpression),
 		ReturnValues:              types.ReturnValueUpdatedNew,
 	})
 	if err != nil {
+		var apiErr smithy.APIError
+		if ok := errors.As(err, &apiErr); ok {
+			if apiErr.ErrorCode() == "ConditionalCheckFailedException" {
+				logger.Logger.Info("No item in TrainingItemCounter table, put initial item.", logger.ErrAttr(err))
+				_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+					TableName: aws.String("TrainingItemCounter"),
+					Item: map[string]types.AttributeValue{
+						"CountKey":    &types.AttributeValueMemberS{Value: "key"},
+						"CountNumber": &types.AttributeValueMemberN{Value: "0"},
+					},
+					ConditionExpression: aws.String("attribute_not_exists(CountKey)"),
+				})
+				if err != nil {
+					logger.Logger.Error("Failed to create TrainingItemCounter item.", logger.ErrAttr(err))
+
+				}
+			}
+			return 1, nil
+		}
+
 		logger.Logger.Error("GetIncrementId Failed.", logger.ErrAttr(err))
 		return -1, err
 	}

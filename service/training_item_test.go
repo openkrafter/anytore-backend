@@ -76,8 +76,8 @@ func TestGetTraningItems(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
 				testenvironment.SetupTraningItemTestData(trainingItem)
-				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
 			}
+			defer testenvironment.TeardownTraningItemTestData()
 
 			got, err := GetTraningItems(tt.args.userId)
 			if (err != nil) != tt.wantErr {
@@ -152,8 +152,8 @@ func TestGetTraningItem(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
 				testenvironment.SetupTraningItemTestData(trainingItem)
-				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
 			}
+			defer testenvironment.TeardownTraningItemTestData()
 
 			got, err := GetTraningItem(tt.args.id, tt.args.userId)
 			if (err != nil) != tt.wantErr {
@@ -242,8 +242,8 @@ func TestUpdateTraningItem(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
 				testenvironment.SetupTraningItemTestData(trainingItem)
-				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
 			}
+			defer testenvironment.TeardownTraningItemTestData()
 
 			if err := UpdateTraningItem(tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
@@ -290,8 +290,8 @@ func TestDeleteTraningItem(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
 				testenvironment.SetupTraningItemTestData(trainingItem)
-				defer testenvironment.TeardownTraningItemTestData(trainingItem.Id)
 			}
+			defer testenvironment.TeardownTraningItemTestData()
 
 			if err := DeleteTraningItem(tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)

@@ -16,9 +16,6 @@ func setup() error {
 	anytoreConfig.InitConfig()
 	testenvironment.SetupDynamoDbClient()
 
-	// go Run()
-	// time.Sleep(10 * time.Millisecond)
-
 	return nil
 }
 

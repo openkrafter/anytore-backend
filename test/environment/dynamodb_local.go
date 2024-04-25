@@ -2,8 +2,8 @@ package testenvironment
 
 import (
 	"context"
+	"log"
 	"net/url"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -62,21 +62,61 @@ func SetupTraningItemTestData(input *model.TrainingItem) error {
 	return nil
 }
 
-func TeardownTraningItemTestData(id int) error {
+func SetupTraningItemCounterTestData(input *model.TrainingItem) error {
 	tableName := "TrainingItem"
-	deleteInput := &dynamodb.DeleteItemInput{
-		Key: map[string]types.AttributeValue{
-			"Id": &types.AttributeValueMemberN{
-				Value: strconv.Itoa(id),
-			},
-		},
-		TableName: aws.String(tableName),
+	av, err := attributevalue.MarshalMap(input)
+	if err != nil {
+		return err
 	}
-
-	_, err := anytoreDynamodb.DynamoDbClient.DeleteItem(context.Background(), deleteInput)
+	_, err = anytoreDynamodb.DynamoDbClient.PutItem(context.Background(), &dynamodb.PutItemInput{
+		TableName: aws.String(tableName),
+		Item:      av,
+	})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func TeardownTraningItemTestData() error {
+	tables := [][]string{
+		{"TrainingItem", "Id"},
+		{"TrainingItemCounter", "CountKey"},
+	}
+
+	for _, table := range tables {
+		deleteAllItems(table[0], table[1])
+	}
+
+	return nil
+}
+
+func deleteAllItems(tableName string, keyName string) {
+	params := &dynamodb.ScanInput{
+		TableName: aws.String(tableName),
+	}
+	deleteItems, err := anytoreDynamodb.DynamoDbClient.Scan(context.TODO(), params)
+	if err != nil {
+		logger.Logger.Error("Failed to scan items.", logger.ErrAttr(err))
+		return
+	}
+
+	for _, item := range deleteItems.Items {
+		log.Printf("Delete item: %v", item)
+		deleteParams := &dynamodb.DeleteItemInput{
+			TableName: aws.String(tableName),
+			Key: map[string]types.AttributeValue{
+				keyName: item[keyName],
+			},
+		}
+
+		_, err := anytoreDynamodb.DynamoDbClient.DeleteItem(context.TODO(), deleteParams)
+		if err != nil {
+			logger.Logger.Error("Failed to delete item.", logger.ErrAttr(err))
+			return
+		}
+	}
+
+	log.Printf("Deleted all items in table: %s", tableName)
 }
