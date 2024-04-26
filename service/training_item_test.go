@@ -167,33 +167,6 @@ func TestGetTraningItem(t *testing.T) {
 	}
 }
 
-func TestGetIncrementId(t *testing.T) {
-	tests := []struct {
-		name    string
-		want    reflect.Type
-		wantErr bool
-	}{
-		{
-			name: "case1",
-			want: reflect.TypeOf(1),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			incrementId, err := GetIncrementId()
-			got := reflect.TypeOf(incrementId)
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetIncrementId() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("GetIncrementId() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestUpdateTraningItem(t *testing.T) {
 	type args struct {
 		input  *model.TrainingItem

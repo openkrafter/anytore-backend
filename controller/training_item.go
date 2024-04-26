@@ -84,12 +84,6 @@ func CreateTraningItem(c *gin.Context) {
 		return
 	}
 
-	requestBody.Id, err = service.GetIncrementId()
-	if err != nil {
-		logger.Logger.Error("CreateTraningItem Failed.", logger.ErrAttr(err))
-		return
-	}
-
 	err = service.CreateTraningItem(&requestBody)
 	if err != nil {
 		logger.Logger.Error("CreateTraningItem Failed.", logger.ErrAttr(err))

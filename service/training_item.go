@@ -143,7 +143,99 @@ func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 	return trainingItem, nil
 }
 
-func GetIncrementId() (int, error) {
+func CreateTraningItem(trainingItem *model.TrainingItem) error {
+	basics, err := NewTableBasics("TrainingItem")
+	if err != nil {
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
+		return err
+	}
+
+	trainingItem.Id, err = getIncrementId()
+	if err != nil {
+		logger.Logger.Error("getIncrementId Failed.", logger.ErrAttr(err))
+		return err
+	}
+
+	av, err := attributevalue.MarshalMap(trainingItem)
+	if err != nil {
+		return err
+	}
+	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(basics.TableName),
+		Item:      av,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateTraningItem(trainingItem *model.TrainingItem, userId int) error {
+	basics, err := NewTableBasics("TrainingItem")
+	if err != nil {
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
+		return err
+	}
+
+	getTraningItemResult, err := GetTraningItem(trainingItem.Id, userId)
+	if err != nil {
+		return err
+	}
+	if getTraningItemResult == nil {
+		error404 := customerror.NewError404()
+		return &error404
+	}
+
+	av, err := attributevalue.MarshalMap(trainingItem)
+	if err != nil {
+		return err
+	}
+	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(basics.TableName),
+		Item:      av,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteTraningItem(id int, userId int) error {
+	basics, err := NewTableBasics("TrainingItem")
+	if err != nil {
+		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
+		return err
+	}
+
+	getTraningItemResult, err := GetTraningItem(id, userId)
+	if err != nil {
+		return err
+	}
+	if getTraningItemResult == nil {
+		error404 := customerror.NewError404()
+		return &error404
+	}
+
+	deleteInput := &dynamodb.DeleteItemInput{
+		Key: map[string]types.AttributeValue{
+			"Id": &types.AttributeValueMemberN{
+				Value: strconv.Itoa(id),
+			},
+		},
+		TableName: aws.String(basics.TableName),
+	}
+
+	_, err = basics.DynamoDbClient.DeleteItem(context.TODO(), deleteInput)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getIncrementId() (int, error) {
 	basics, err := NewTableBasics("TrainingItemCounter")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
@@ -210,89 +302,4 @@ func GetIncrementId() (int, error) {
 	}
 
 	return int(updatedAttributes.CountNumber), nil
-}
-
-func CreateTraningItem(input *model.TrainingItem) error {
-	basics, err := NewTableBasics("TrainingItem")
-	if err != nil {
-		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
-		return err
-	}
-	av, err := attributevalue.MarshalMap(input)
-	if err != nil {
-		return err
-	}
-	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(basics.TableName),
-		Item:      av,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateTraningItem(input *model.TrainingItem, userId int) error {
-	basics, err := NewTableBasics("TrainingItem")
-	if err != nil {
-		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
-		return err
-	}
-
-	trainingItem, err := GetTraningItem(input.Id, userId)
-	if err != nil {
-		return err
-	}
-	if trainingItem == nil {
-		error404 := customerror.NewError404()
-		return &error404
-	}
-
-	av, err := attributevalue.MarshalMap(input)
-	if err != nil {
-		return err
-	}
-	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(basics.TableName),
-		Item:      av,
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteTraningItem(id int, userId int) error {
-	basics, err := NewTableBasics("TrainingItem")
-	if err != nil {
-		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
-		return err
-	}
-
-	trainingItem, err := GetTraningItem(id, userId)
-	if err != nil {
-		return err
-	}
-	if trainingItem == nil {
-		error404 := customerror.NewError404()
-		return &error404
-	}
-
-	deleteInput := &dynamodb.DeleteItemInput{
-		Key: map[string]types.AttributeValue{
-			"Id": &types.AttributeValueMemberN{
-				Value: strconv.Itoa(id),
-			},
-		},
-		TableName: aws.String(basics.TableName),
-	}
-
-	_, err = basics.DynamoDbClient.DeleteItem(context.TODO(), deleteInput)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
