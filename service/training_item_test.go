@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log"
 	"reflect"
 	"sort"
@@ -79,7 +80,7 @@ func TestGetTraningItems(t *testing.T) {
 			}
 			defer testenvironment.TeardownTraningItemTestData()
 
-			got, err := GetTraningItems(tt.args.userId)
+			got, err := GetTraningItems(context.Background(), tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -155,7 +156,7 @@ func TestGetTraningItem(t *testing.T) {
 			}
 			defer testenvironment.TeardownTraningItemTestData()
 
-			got, err := GetTraningItem(tt.args.id, tt.args.userId)
+			got, err := GetTraningItem(context.Background(), tt.args.id, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -218,7 +219,7 @@ func TestUpdateTraningItem(t *testing.T) {
 			}
 			defer testenvironment.TeardownTraningItemTestData()
 
-			if err := UpdateTraningItem(tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
+			if err := UpdateTraningItem(context.Background(), tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -266,7 +267,7 @@ func TestDeleteTraningItem(t *testing.T) {
 			}
 			defer testenvironment.TeardownTraningItemTestData()
 
-			if err := DeleteTraningItem(tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
+			if err := DeleteTraningItem(context.Background(), tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

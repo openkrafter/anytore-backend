@@ -22,7 +22,8 @@ func ListTraningItem(c *gin.Context) {
 		return
 	}
 
-	trainingItems, err := service.GetTraningItems(userId)
+	ctx := c.Request.Context()
+	trainingItems, err := service.GetTraningItems(ctx, userId)
 	if err != nil {
 		logger.Logger.Error("ListTraningItem Failed.", logger.ErrAttr(err))
 		return
@@ -55,7 +56,8 @@ func GetTraningItem(c *gin.Context) {
 		return
 	}
 
-	trainingItem, err := service.GetTraningItem(trainingItemId, userId)
+	ctx := c.Request.Context()
+	trainingItem, err := service.GetTraningItem(ctx, trainingItemId, userId)
 	if err != nil {
 		logger.Logger.Error("GetTraningItem Failed.", logger.ErrAttr(err))
 		return
@@ -84,7 +86,8 @@ func CreateTraningItem(c *gin.Context) {
 		return
 	}
 
-	err = service.CreateTraningItem(&requestBody)
+	ctx := c.Request.Context()
+	err = service.CreateTraningItem(ctx, &requestBody)
 	if err != nil {
 		logger.Logger.Error("CreateTraningItem Failed.", logger.ErrAttr(err))
 		return
@@ -120,7 +123,8 @@ func UpdateTraningItem(c *gin.Context) {
 		return
 	}
 
-	err = service.UpdateTraningItem(&requestBody, userId)
+	ctx := c.Request.Context()
+	err = service.UpdateTraningItem(ctx, &requestBody, userId)
 	if err != nil {
 		if customErr, ok := err.(*customerror.Error404); ok {
 			c.JSON(customErr.ErrorCode, customErr.Body)
@@ -148,7 +152,8 @@ func DeleteTraningItem(c *gin.Context) {
 		return
 	}
 
-	err = service.DeleteTraningItem(trainingItemId, userId)
+	ctx := c.Request.Context()
+	err = service.DeleteTraningItem(ctx, trainingItemId, userId)
 	if err != nil {
 		if customErr, ok := err.(*customerror.Error404); ok {
 			c.JSON(customErr.ErrorCode, customErr.Body)

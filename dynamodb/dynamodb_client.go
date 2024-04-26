@@ -14,7 +14,7 @@ var DynamoDbClient *dynamodb.Client
 func InitDynamoDbClient() {
 	logger.Logger.Debug("Init DynamoDB client.")
 
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
 		panic("Failed to start anytore.")

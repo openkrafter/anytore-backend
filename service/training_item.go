@@ -17,7 +17,7 @@ import (
 	"github.com/openkrafter/anytore-backend/model"
 )
 
-func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
+func GetTraningItems(ctx context.Context, userId int) ([]*model.TrainingItem, error) {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
@@ -52,7 +52,7 @@ func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
 		IndexName:                 aws.String("UserIdIndex"),
 	}
 
-	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
+	response, err := basics.DynamoDbClient.Query(ctx, queryInput)
 	if err != nil {
 		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
@@ -78,7 +78,7 @@ func GetTraningItems(userId int) ([]*model.TrainingItem, error) {
 	return trainingItems, nil
 }
 
-func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
+func GetTraningItem(ctx context.Context, id int, userId int) (*model.TrainingItem, error) {
 	logger.Logger.Debug("GetTraningItem process", slog.Int("id", id))
 
 	logger.Logger.Debug("Init DynamoDB client.")
@@ -120,7 +120,7 @@ func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 		IndexName:                 aws.String("UserIdIndex"),
 	}
 
-	response, err := basics.DynamoDbClient.Query(context.TODO(), queryInput)
+	response, err := basics.DynamoDbClient.Query(ctx, queryInput)
 	if err != nil {
 		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
 		return nil, err
@@ -143,14 +143,14 @@ func GetTraningItem(id int, userId int) (*model.TrainingItem, error) {
 	return trainingItem, nil
 }
 
-func CreateTraningItem(trainingItem *model.TrainingItem) error {
+func CreateTraningItem(ctx context.Context, trainingItem *model.TrainingItem) error {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return err
 	}
 
-	trainingItem.Id, err = getIncrementId()
+	trainingItem.Id, err = getIncrementId(ctx)
 	if err != nil {
 		logger.Logger.Error("getIncrementId Failed.", logger.ErrAttr(err))
 		return err
@@ -160,7 +160,7 @@ func CreateTraningItem(trainingItem *model.TrainingItem) error {
 	if err != nil {
 		return err
 	}
-	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err = basics.DynamoDbClient.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(basics.TableName),
 		Item:      av,
 	})
@@ -171,14 +171,14 @@ func CreateTraningItem(trainingItem *model.TrainingItem) error {
 	return nil
 }
 
-func UpdateTraningItem(trainingItem *model.TrainingItem, userId int) error {
+func UpdateTraningItem(ctx context.Context, trainingItem *model.TrainingItem, userId int) error {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return err
 	}
 
-	getTraningItemResult, err := GetTraningItem(trainingItem.Id, userId)
+	getTraningItemResult, err := GetTraningItem(ctx, trainingItem.Id, userId)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func UpdateTraningItem(trainingItem *model.TrainingItem, userId int) error {
 	if err != nil {
 		return err
 	}
-	_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err = basics.DynamoDbClient.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(basics.TableName),
 		Item:      av,
 	})
@@ -202,14 +202,14 @@ func UpdateTraningItem(trainingItem *model.TrainingItem, userId int) error {
 	return nil
 }
 
-func DeleteTraningItem(id int, userId int) error {
+func DeleteTraningItem(ctx context.Context, id int, userId int) error {
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
 		return err
 	}
 
-	getTraningItemResult, err := GetTraningItem(id, userId)
+	getTraningItemResult, err := GetTraningItem(ctx, id, userId)
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func DeleteTraningItem(id int, userId int) error {
 		TableName: aws.String(basics.TableName),
 	}
 
-	_, err = basics.DynamoDbClient.DeleteItem(context.TODO(), deleteInput)
+	_, err = basics.DynamoDbClient.DeleteItem(ctx, deleteInput)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func DeleteTraningItem(id int, userId int) error {
 	return nil
 }
 
-func getIncrementId() (int, error) {
+func getIncrementId(ctx context.Context) (int, error) {
 	basics, err := NewTableBasics("TrainingItemCounter")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
@@ -261,7 +261,7 @@ func getIncrementId() (int, error) {
 		},
 	}
 
-	result, err := basics.DynamoDbClient.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
+	result, err := basics.DynamoDbClient.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName:                 aws.String("TrainingItemCounter"),
 		Key:                       countKey,
 		UpdateExpression:          aws.String(updateExpression),
@@ -274,7 +274,7 @@ func getIncrementId() (int, error) {
 		if ok := errors.As(err, &apiErr); ok {
 			if apiErr.ErrorCode() == "ConditionalCheckFailedException" {
 				logger.Logger.Info("No item in TrainingItemCounter table, put initial item.", logger.ErrAttr(err))
-				_, err = basics.DynamoDbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+				_, err = basics.DynamoDbClient.PutItem(ctx, &dynamodb.PutItemInput{
 					TableName: aws.String("TrainingItemCounter"),
 					Item: map[string]types.AttributeValue{
 						"CountKey":    &types.AttributeValueMemberS{Value: "key"},

@@ -31,7 +31,7 @@ func (*resolverV2) ResolveEndpoint(ctx context.Context, params dynamodb.Endpoint
 }
 
 func SetupDynamoDbClient() error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.Background())
 
 	if err != nil {
 		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
@@ -96,7 +96,7 @@ func deleteAllItems(tableName string, keyName string) {
 	params := &dynamodb.ScanInput{
 		TableName: aws.String(tableName),
 	}
-	deleteItems, err := anytoreDynamodb.DynamoDbClient.Scan(context.TODO(), params)
+	deleteItems, err := anytoreDynamodb.DynamoDbClient.Scan(context.Background(), params)
 	if err != nil {
 		logger.Logger.Error("Failed to scan items.", logger.ErrAttr(err))
 		return
@@ -111,7 +111,7 @@ func deleteAllItems(tableName string, keyName string) {
 			},
 		}
 
-		_, err := anytoreDynamodb.DynamoDbClient.DeleteItem(context.TODO(), deleteParams)
+		_, err := anytoreDynamodb.DynamoDbClient.DeleteItem(context.Background(), deleteParams)
 		if err != nil {
 			logger.Logger.Error("Failed to delete item.", logger.ErrAttr(err))
 			return
