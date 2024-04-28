@@ -28,6 +28,12 @@ jobs:
       - name: Start Docker Compose
         run: docker-compose -f platform/local/docker-compose.yml up -d
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
       - name: Run dynamodb local setup
         run: ./platform/local/dynamodb-local-setup.sh
 
