@@ -85,9 +85,15 @@ func TestGetTraningItems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			r := gin.Default()
 			RegisterRoutes(r)
@@ -95,8 +101,7 @@ func TestGetTraningItems(t *testing.T) {
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
 			if err != nil {
-				t.Errorf("NewRequest error = %v", err)
-				return
+				t.Fatalf("NewRequest error = %v", err)
 			}
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
 
@@ -170,9 +175,15 @@ func TestGetTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			r := gin.Default()
 			RegisterRoutes(r)
@@ -180,8 +191,7 @@ func TestGetTraningItem(t *testing.T) {
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
 			if err != nil {
-				t.Errorf("NewRequest error = %v", err)
-				return
+				t.Fatalf("NewRequest error = %v", err)
 			}
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
 
@@ -243,7 +253,11 @@ func TestCreateTraningItem(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			r := gin.Default()
 			RegisterRoutes(r)
@@ -344,9 +358,15 @@ func TestUpdateTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			r := gin.Default()
 			RegisterRoutes(r)
@@ -354,14 +374,12 @@ func TestUpdateTraningItem(t *testing.T) {
 
 			jsonData, err := json.Marshal(tt.args.trainingItem)
 			if err != nil {
-				t.Errorf("json Marshal Error: %v", err)
-				return
+				t.Fatalf("json Marshal Error: %v", err)
 			}
 
 			req, err := http.NewRequest("PUT", tt.args.path, bytes.NewBuffer(jsonData))
 			if err != nil {
-				t.Errorf("NewRequest error = %v", err)
-				return
+				t.Fatalf("NewRequest error = %v", err)
 			}
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
 			req.Header.Set("Content-Type", "application/json")
@@ -428,9 +446,15 @@ func TestDeleteTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			r := gin.Default()
 			RegisterRoutes(r)
@@ -438,8 +462,7 @@ func TestDeleteTraningItem(t *testing.T) {
 
 			req, err := http.NewRequest("DELETE", tt.args.path, nil)
 			if err != nil {
-				t.Errorf("NewRequest error = %v", err)
-				return
+				t.Fatalf("NewRequest error = %v", err)
 			}
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
 

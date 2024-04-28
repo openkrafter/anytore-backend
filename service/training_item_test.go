@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"reflect"
 	"sort"
 	"testing"
@@ -76,14 +75,19 @@ func TestGetTraningItems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			got, err := GetTraningItems(context.Background(), tt.args.userId)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
-				return
+				t.Fatalf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			sort.Slice(got, func(i, j int) bool {
@@ -93,13 +97,6 @@ func TestGetTraningItems(t *testing.T) {
 			})
 
 			if !reflect.DeepEqual(got, tt.want) {
-				for _, trainingItem := range got {
-					log.Println(trainingItem)
-				}
-				for _, trainingItem := range tt.want {
-					log.Println(trainingItem)
-				}
-
 				t.Errorf("GetTraningItems() = %v, want %v", got, tt.want)
 			}
 		})
@@ -152,15 +149,21 @@ func TestGetTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			got, err := GetTraningItem(context.Background(), tt.args.id, tt.args.userId)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
-				return
+				t.Fatalf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetTraningItem() = %v, want %v", got, tt.want)
 			}
@@ -215,9 +218,15 @@ func TestUpdateTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			if err := UpdateTraningItem(context.Background(), tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
@@ -263,9 +272,15 @@ func TestDeleteTraningItem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, trainingItem := range tt.setupDynamoData {
-				testenvironment.SetupTraningItemTestData(trainingItem)
+				if err := testenvironment.SetupTraningItemTestData(trainingItem); err != nil {
+					t.Fatalf("SetupTraningItemTestData Faled: %v", err)
+				}
 			}
-			defer testenvironment.TeardownTraningItemTestData()
+			defer func() {
+				if err := testenvironment.TeardownTraningItemTestData(); err != nil {
+					t.Fatalf("TeardownTraningItemTestData Faled: %v", err)
+				}
+			}()
 
 			if err := DeleteTraningItem(context.Background(), tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)

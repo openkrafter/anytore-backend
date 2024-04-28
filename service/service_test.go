@@ -14,7 +14,12 @@ func setup() error {
 	logger.Logger.Info("service package test setup")
 
 	anytoreConfig.InitConfig()
-	testenvironment.SetupDynamoDbClient()
+
+	err := testenvironment.SetupDynamoDbClient()
+	if err != nil {
+		logger.Logger.Error("SetupDynamoDbClient failed.", logger.ErrAttr(err))
+		return err
+	}
 
 	return nil
 }

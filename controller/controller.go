@@ -61,5 +61,10 @@ func Run() {
 	}
 
 	RegisterRoutes(r)
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
+	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	if err := r.Run(); err != nil {
+		logger.Logger.Error("Failed to start the server.", logger.ErrAttr(err))
+		return
+	}
 }
