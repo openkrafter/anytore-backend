@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - gh-action
+    tags:
+      - 'v*'
 
 env:
   AWS_REGION: ap-northeast-1

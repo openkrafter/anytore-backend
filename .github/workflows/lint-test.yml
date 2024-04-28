@@ -1,0 +1,36 @@
+name: Go Lint & Test Sequence
+run-name: Exec golangci-lint and go test
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.5'
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v5
+        with:
+          version: v1.57.2
+        run: golangci-lint run
+
+      - name: Start Docker Compose
+        run: docker-compose -f platform/local/docker-compose.yml up -d
+
+      - name: Run dynamodb local setup
+        run: ./platform/local/dynamodb-local-setup.sh
+
+      - name: Run Tests
+        run: go test -v ./...
