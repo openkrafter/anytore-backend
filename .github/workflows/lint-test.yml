@@ -3,10 +3,8 @@ run-name: Exec golangci-lint and go test
 on:
   push:
     branches:
-      - '**'
-  pull_request:
-    branches:
-      - '**'
+      - main
+      - gh-action
 
 jobs:
   lint-and-test:
