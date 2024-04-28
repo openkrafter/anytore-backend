@@ -28,11 +28,11 @@ jobs:
       - name: Start Docker Compose
         run: docker-compose -f platform/local/docker-compose.yml up -d
 
-      - name: Install AWS CLI
+      - name: Set dummy AWS credentials
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          aws configure set aws_access_key_id dummy
+          aws configure set aws_secret_access_key dummy
+          aws configure set region ap-northeast-1
 
       - name: Run dynamodb local setup
         run: ./platform/local/dynamodb-local-setup.sh
