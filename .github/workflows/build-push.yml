@@ -2,9 +2,6 @@ name: Build & ECR push
 run-name: Build docker image and push to ECR.
 on:
   push:
-    branches:
-      - main
-      - gh-action
     tags:
       - 'v*'
 

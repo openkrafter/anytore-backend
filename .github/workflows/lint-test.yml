@@ -24,7 +24,6 @@ jobs:
         uses: golangci/golangci-lint-action@v5
         with:
           version: v1.57.2
-        run: golangci-lint run
 
       - name: Start Docker Compose
         run: docker-compose -f platform/local/docker-compose.yml up -d
