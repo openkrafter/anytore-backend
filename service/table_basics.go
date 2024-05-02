@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	anytoreDynamodb "github.com/openkrafter/anytore-backend/dynamodb"
+	anytoreDynamodb "github.com/openkrafter/anytore-backend/database/dynamodb"
 )
 
 type TableBasics struct {
