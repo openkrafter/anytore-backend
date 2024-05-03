@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openkrafter/anytore-backend/controller"
 	"github.com/openkrafter/anytore-backend/model"
 	testenvironment "github.com/openkrafter/anytore-backend/test/environment"
 )
@@ -96,7 +97,7 @@ func TestGetTraningItems(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
@@ -186,7 +187,7 @@ func TestGetTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
@@ -260,7 +261,7 @@ func TestCreateTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			jsonData, err := json.Marshal(tt.args.trainingItem)
@@ -369,7 +370,7 @@ func TestUpdateTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			jsonData, err := json.Marshal(tt.args.trainingItem)
@@ -457,7 +458,7 @@ func TestDeleteTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("DELETE", tt.args.path, nil)

@@ -30,6 +30,10 @@ func (s *MockSQLDBService) QueryContext(query string, args ...interface{}) (*sql
 	return s.Db.Query(query, args...)
 }
 
+func (s *MockSQLDBService) QueryRowContext(query string, args ...interface{}) *sql.Row {
+	return s.Db.QueryRow(query, args...)
+}
+
 func (s *MockSQLDBService) ExecContext(query string, args ...interface{}) (sql.Result, error) {
 	return s.Db.Exec(query, args...)
 }

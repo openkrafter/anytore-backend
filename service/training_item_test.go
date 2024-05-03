@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/openkrafter/anytore-backend/model"
+	"github.com/openkrafter/anytore-backend/service"
 	testenvironment "github.com/openkrafter/anytore-backend/test/environment"
 )
 
@@ -85,7 +86,7 @@ func TestGetTraningItems(t *testing.T) {
 				}
 			}()
 
-			got, err := GetTraningItems(context.Background(), tt.args.userId)
+			got, err := service.GetTraningItems(context.Background(), tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("GetTraningItems() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -159,7 +160,7 @@ func TestGetTraningItem(t *testing.T) {
 				}
 			}()
 
-			got, err := GetTraningItem(context.Background(), tt.args.id, tt.args.userId)
+			got, err := service.GetTraningItem(context.Background(), tt.args.id, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("GetTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -228,7 +229,7 @@ func TestUpdateTraningItem(t *testing.T) {
 				}
 			}()
 
-			if err := UpdateTraningItem(context.Background(), tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
+			if err := service.UpdateTraningItem(context.Background(), tt.args.input, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -282,7 +283,7 @@ func TestDeleteTraningItem(t *testing.T) {
 				}
 			}()
 
-			if err := DeleteTraningItem(context.Background(), tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
+			if err := service.DeleteTraningItem(context.Background(), tt.args.id, tt.args.userId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteTraningItem() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
