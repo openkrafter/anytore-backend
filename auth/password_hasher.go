@@ -4,6 +4,7 @@ import "golang.org/x/crypto/bcrypt"
 
 type PasswordHasher interface {
 	HashPassword(password string) (string, error)
+	CompareHashAndPassword(hashedPassword string, password string) error
 }
 
 type BcryptHasher struct{}

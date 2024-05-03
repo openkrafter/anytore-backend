@@ -91,7 +91,7 @@ func TestGetUsers(t *testing.T) {
 	}
 }
 
-func TestGetUser(t *testing.T) {
+func TestGetUserById(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		id  int
@@ -151,7 +151,7 @@ func TestGetUser(t *testing.T) {
 
 			mockService.Mock.ExpectQuery(query).WithArgs(tt.args.id).WillReturnRows(row)
 
-			got, err := service.GetUser(tt.args.ctx, tt.args.id)
+			got, err := service.GetUserById(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetUser() error = %v, wantErr %v", err, tt.wantErr)
 			}

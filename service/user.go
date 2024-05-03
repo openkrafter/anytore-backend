@@ -49,7 +49,7 @@ func GetUsers(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func GetUser(ctx context.Context, id int) (*model.User, error) {
+func GetUserById(ctx context.Context, id int) (*model.User, error) {
 	query := `
 		SELECT
 			id,
@@ -76,6 +76,40 @@ func GetUser(ctx context.Context, id int) (*model.User, error) {
 		&user.UpdatedAt,
 	)
 	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
+	query := `
+		SELECT
+			id,
+			name,
+			email,
+			password,
+			created_at,
+			updated_at
+		FROM
+			users
+		WHERE
+			email = ?
+	`
+
+	row := sqldb.SQLDBClient.QueryRowContext(ctx, query, email)
+
+	var user model.User
+	err := row.Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		logger.Logger.Error("Error scanning user", err)
 		return nil, err
 	}
 

@@ -13,3 +13,7 @@ func NewMockHasher() *MockHasher {
 func (h *MockHasher) HashPassword(password string) (string, error) {
 	return "hash_value", nil
 }
+
+func (h *MockHasher) CompareHashAndPassword(hashedPassword string, password string) error {
+	return nil
+}
