@@ -396,7 +396,6 @@ func TestUpdateTraningItem(t *testing.T) {
 				t.Fatalf("Failed to decode response body: %v", err)
 			}
 
-			log.Println(got)
 			if !reflect.DeepEqual(got, tt.wantBody) {
 				t.Errorf("UpdateTraningItem API = %v, want %v", got, tt.wantBody)
 			}

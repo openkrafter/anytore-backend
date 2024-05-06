@@ -92,6 +92,12 @@ func UpdateTraningItem(c *gin.Context) {
 		return
 	}
 
+	requestBody.Id, err = strconv.Atoi(c.Param("training-item-id"))
+	if err != nil {
+		logger.Logger.Error("UpdateTraningItem Failed. Failed to convert training-item-id string to int.", logger.ErrAttr(err))
+		return
+	}
+
 	ctx := c.Request.Context()
 	if err = service.UpdateTraningItem(ctx, &requestBody, userId); err != nil {
 		if customErr, ok := err.(*customerror.Error404); ok {

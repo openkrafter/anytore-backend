@@ -11,11 +11,11 @@ import (
 	"github.com/openkrafter/anytore-backend/service"
 )
 
-func ListUser(c *gin.Context) {
+func ListUsers(c *gin.Context) {
 	ctx := c.Request.Context()
 	users, err := service.GetUsers(ctx)
 	if err != nil {
-		logger.Logger.Error("ListUser Failed.", logger.ErrAttr(err))
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
 		return
 	}
 	if users == nil {
@@ -73,6 +73,13 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
+	var err error
+	requestBody.Id, err = strconv.Atoi(c.Param("user-id"))
+	if err != nil {
+		logger.Logger.Error("UpdateUser Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
+		return
+	}
+
 	ctx := c.Request.Context()
 	if err := service.UpdateUser(ctx, &requestBody); err != nil {
 		logger.Logger.Error("UpdateUser Failed.", logger.ErrAttr(err))
@@ -83,8 +90,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	userIdString := c.Param("user-id")
-	userId, err := strconv.Atoi(userIdString)
+	userId, err := strconv.Atoi(c.Param("user-id"))
 	if err != nil {
 		logger.Logger.Error("DeleteUser Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
 		return

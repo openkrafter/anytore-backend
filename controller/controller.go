@@ -42,7 +42,7 @@ func RegisterAdminRoutes(r *gin.Engine) {
 		username: password,
 	}))
 
-	adminGroup.GET("/users", ListUser)
+	adminGroup.GET("/users", ListUsers)
 	adminGroup.GET("/users/:user-id", GetUser)
 	adminGroup.POST("/users", CreateUser)
 	adminGroup.PUT("/users/:user-id", UpdateUser)
@@ -55,6 +55,7 @@ func Run() {
 	r := gin.Default()
 
 	setCors(r)
+	setCSP(r)
 	RegisterRoutes(r)
 	RegisterAdminRoutes(r)
 
@@ -68,7 +69,7 @@ func Run() {
 func setCors(r *gin.Engine) {
 	if os.Getenv("GIN_MODE") == "release" {
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"https://anytore.net"},
+			AllowOrigins:     []string{os.Getenv("PROD_CORS_ORIGIN")},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -79,7 +80,7 @@ func setCors(r *gin.Engine) {
 		logger.Logger.Debug("CORS setting: debug mode")
 
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowOrigins:     []string{os.Getenv("DEV_CORS_ORIGIN")},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -87,4 +88,11 @@ func setCors(r *gin.Engine) {
 			MaxAge:           6 * time.Hour,
 		}))
 	}
+}
+
+func setCSP(r *gin.Engine) {
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self';")
+		c.Next()
+	})
 }
