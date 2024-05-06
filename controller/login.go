@@ -28,11 +28,11 @@ func Login(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	token, err := service.Login(ctx, loginRequest.Email, loginRequest.Password)
+	token, user, err := service.Login(ctx, loginRequest.Email, loginRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to login"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
 }

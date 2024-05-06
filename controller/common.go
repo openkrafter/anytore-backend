@@ -4,9 +4,20 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openkrafter/anytore-backend/service"
 )
 
-func GetTokenFromAuthorizationHeader(c *gin.Context) string {
+func ValidateTokenAndGetUserId(c *gin.Context) (int, error) {
+	receivedToken := getTokenFromAuthorizationHeader(c)
+	userId, err := service.ValidateToken(receivedToken)
+	if err != nil {
+		return 0, err
+	}
+
+	return userId, nil
+}
+
+func getTokenFromAuthorizationHeader(c *gin.Context) string {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return ""

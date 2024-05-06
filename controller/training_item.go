@@ -12,10 +12,10 @@ import (
 )
 
 func ListTraningItem(c *gin.Context) {
-	userIdString := GetTokenFromAuthorizationHeader(c)
-	userId, err := strconv.Atoi(userIdString)
+	userId, err := ValidateTokenAndGetUserId(c)
 	if err != nil {
-		logger.Logger.Error("Failed to convert userId string to int.", logger.ErrAttr(err))
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
 		return
 	}
 
@@ -34,10 +34,10 @@ func ListTraningItem(c *gin.Context) {
 }
 
 func GetTraningItem(c *gin.Context) {
-	userIdString := GetTokenFromAuthorizationHeader(c)
-	userId, err := strconv.Atoi(userIdString)
+	userId, err := ValidateTokenAndGetUserId(c)
 	if err != nil {
-		logger.Logger.Error("GetTraningItem Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
 		return
 	}
 
@@ -63,11 +63,19 @@ func GetTraningItem(c *gin.Context) {
 }
 
 func CreateTraningItem(c *gin.Context) {
+	userId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
 	var requestBody model.TrainingItem
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		logger.Logger.Error("CreateTraningItem Failed. Failed to bind request body.", logger.ErrAttr(err))
 		return
 	}
+
+	requestBody.UserId = userId
 
 	ctx := c.Request.Context()
 	if err := service.CreateTraningItem(ctx, &requestBody); err != nil {
@@ -79,10 +87,10 @@ func CreateTraningItem(c *gin.Context) {
 }
 
 func UpdateTraningItem(c *gin.Context) {
-	userIdString := GetTokenFromAuthorizationHeader(c)
-	userId, err := strconv.Atoi(userIdString)
+	userId, err := ValidateTokenAndGetUserId(c)
 	if err != nil {
-		logger.Logger.Error("UpdateTraningItem Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
 		return
 	}
 
@@ -92,6 +100,7 @@ func UpdateTraningItem(c *gin.Context) {
 		return
 	}
 
+	requestBody.UserId = userId
 	requestBody.Id, err = strconv.Atoi(c.Param("training-item-id"))
 	if err != nil {
 		logger.Logger.Error("UpdateTraningItem Failed. Failed to convert training-item-id string to int.", logger.ErrAttr(err))
@@ -113,10 +122,10 @@ func UpdateTraningItem(c *gin.Context) {
 }
 
 func DeleteTraningItem(c *gin.Context) {
-	userIdString := GetTokenFromAuthorizationHeader(c)
-	userId, err := strconv.Atoi(userIdString)
+	userId, err := ValidateTokenAndGetUserId(c)
 	if err != nil {
-		logger.Logger.Error("Failed to convert userId string to int.", logger.ErrAttr(err))
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
 		return
 	}
 
