@@ -1,17 +1,18 @@
-package controller
+package controller_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openkrafter/anytore-backend/controller"
 	"github.com/openkrafter/anytore-backend/model"
+	"github.com/openkrafter/anytore-backend/service"
 	testenvironment "github.com/openkrafter/anytore-backend/test/environment"
 )
 
@@ -96,14 +97,19 @@ func TestGetTraningItems(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
 			if err != nil {
 				t.Fatalf("NewRequest error = %v", err)
 			}
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
+
+			token, err := service.GenerateToken(tt.args.userId)
+			if err != nil {
+				t.Fatalf("GenerateToken error = %v", err)
+			}
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 			r.ServeHTTP(w, req)
 			if w.Code != tt.wantStatusCode {
@@ -186,14 +192,18 @@ func TestGetTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("GET", tt.args.path, nil)
 			if err != nil {
 				t.Fatalf("NewRequest error = %v", err)
 			}
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
+			token, err := service.GenerateToken(tt.args.userId)
+			if err != nil {
+				t.Fatalf("GenerateToken error = %v", err)
+			}
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 			r.ServeHTTP(w, req)
 			if w.Code != tt.wantStatusCode {
@@ -260,7 +270,7 @@ func TestCreateTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			jsonData, err := json.Marshal(tt.args.trainingItem)
@@ -274,7 +284,11 @@ func TestCreateTraningItem(t *testing.T) {
 				t.Errorf("NewRequest error = %v", err)
 				return
 			}
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
+			token, err := service.GenerateToken(tt.args.userId)
+			if err != nil {
+				t.Fatalf("GenerateToken error = %v", err)
+			}
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 			req.Header.Set("Content-Type", "application/json")
 
 			r.ServeHTTP(w, req)
@@ -288,7 +302,6 @@ func TestCreateTraningItem(t *testing.T) {
 				t.Fatalf("Failed to decode response body: %v", err)
 			}
 
-			log.Println(got)
 			if !reflect.DeepEqual(got, tt.wantBody) {
 				t.Errorf("CreateTraningItem API = %v, want %v", got, tt.wantBody)
 			}
@@ -369,7 +382,7 @@ func TestUpdateTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			jsonData, err := json.Marshal(tt.args.trainingItem)
@@ -381,7 +394,11 @@ func TestUpdateTraningItem(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewRequest error = %v", err)
 			}
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
+			token, err := service.GenerateToken(tt.args.userId)
+			if err != nil {
+				t.Fatalf("GenerateToken error = %v", err)
+			}
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 			req.Header.Set("Content-Type", "application/json")
 
 			r.ServeHTTP(w, req)
@@ -395,7 +412,6 @@ func TestUpdateTraningItem(t *testing.T) {
 				t.Fatalf("Failed to decode response body: %v", err)
 			}
 
-			log.Println(got)
 			if !reflect.DeepEqual(got, tt.wantBody) {
 				t.Errorf("UpdateTraningItem API = %v, want %v", got, tt.wantBody)
 			}
@@ -457,14 +473,18 @@ func TestDeleteTraningItem(t *testing.T) {
 			}()
 
 			r := gin.Default()
-			RegisterRoutes(r)
+			controller.RegisterRoutes(r)
 			w := httptest.NewRecorder()
 
 			req, err := http.NewRequest("DELETE", tt.args.path, nil)
 			if err != nil {
 				t.Fatalf("NewRequest error = %v", err)
 			}
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %d", tt.args.userId))
+			token, err := service.GenerateToken(tt.args.userId)
+			if err != nil {
+				t.Fatalf("GenerateToken error = %v", err)
+			}
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 			r.ServeHTTP(w, req)
 			if w.Code != tt.wantStatusCode {

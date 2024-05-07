@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	smithyendpoints "github.com/aws/smithy-go/endpoints"
-	anytoreDynamodb "github.com/openkrafter/anytore-backend/dynamodb"
+	anytoreDynamodb "github.com/openkrafter/anytore-backend/database/dynamodb"
 	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/model"
 )

@@ -1,6 +1,27 @@
-version: '3'
+version: "3"
 services:
   dynamodb-local:
     image: amazon/dynamodb-local
+    restart: always
+    volumes:
+      - dynamodb-local-data:/home/dynamodblocal/data
     ports:
       - "8000:8000"
+
+  user-db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: anytore
+      MYSQL_USER: develop
+      MYSQL_PASSWORD: example
+    volumes:
+      - user-db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+volumes:
+  dynamodb-local-data: {}
+  user-db-data: {}
