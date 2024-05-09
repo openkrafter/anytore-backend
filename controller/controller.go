@@ -58,27 +58,21 @@ func Run() {
 }
 
 func setCors(r *gin.Engine) {
-	if os.Getenv("GIN_MODE") == "release" {
-		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{os.Getenv("PROD_CORS_ORIGIN")},
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-			MaxAge:           6 * time.Hour,
-		}))
+	config := cors.DefaultConfig()
+	if os.Getenv("CORS_ORIGIN") == "*" {
+		logger.Logger.Debug("CORS setting: allow all origins")
+		config.AllowAllOrigins = true
 	} else {
-		logger.Logger.Debug("CORS setting: debug mode")
-
-		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{os.Getenv("DEV_CORS_ORIGIN")},
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-			MaxAge:           6 * time.Hour,
-		}))
+		logger.Logger.Debug("CORS setting: allow specific origin")
+		config.AllowOrigins = []string{os.Getenv("CORS_ORIGIN")}
 	}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = true
+	config.MaxAge = 6 * time.Hour
+
+	r.Use(cors.New(config))
 }
 
 func setCSP(r *gin.Engine) {
