@@ -24,29 +24,21 @@ func SampleTraningItem(c *gin.Context) {
 }
 
 func RegisterRoutes(r *gin.Engine) {
+	r.GET("/sample", SampleTraningItem) // for debug
+
 	r.POST("/login", Login)
 
-	r.GET("/sample", SampleTraningItem) // for debug
+	r.GET("/admin/users", ListUsers)
+	r.GET("/admin/users/:user-id", GetUser)
+	r.POST("/admin/users", CreateUser)
+	r.PUT("/admin/users/:user-id", UpdateUser)
+	r.DELETE("/admin/users/:user-id", DeleteUser)
+
 	r.GET("/training-items", ListTraningItem)
 	r.GET("/training-items/:training-item-id", GetTraningItem)
 	r.POST("/training-items", CreateTraningItem)
 	r.PUT("/training-items/:training-item-id", UpdateTraningItem)
 	r.DELETE("/training-items/:training-item-id", DeleteTraningItem)
-}
-
-func RegisterAdminRoutes(r *gin.Engine) {
-	adminGroup := r.Group("/admin")
-	username := os.Getenv("ADMIN_USERNAME")
-	password := os.Getenv("ADMIN_PASSWORD")
-	adminGroup.Use(gin.BasicAuth(gin.Accounts{
-		username: password,
-	}))
-
-	adminGroup.GET("/users", ListUsers)
-	adminGroup.GET("/users/:user-id", GetUser)
-	adminGroup.POST("/users", CreateUser)
-	adminGroup.PUT("/users/:user-id", UpdateUser)
-	adminGroup.DELETE("/users/:user-id", DeleteUser)
 }
 
 func Run() {
@@ -57,7 +49,6 @@ func Run() {
 	setCors(r)
 	setCSP(r)
 	RegisterRoutes(r)
-	RegisterAdminRoutes(r)
 
 	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	if err := r.Run(); err != nil {

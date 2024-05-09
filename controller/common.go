@@ -1,9 +1,14 @@
 package controller
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/service"
 )
 
@@ -15,6 +20,21 @@ func ValidateTokenAndGetUserId(c *gin.Context) (int, error) {
 	}
 
 	return userId, nil
+}
+
+func CheckAdminAuthorization(ctx context.Context, userId int) error {
+	user, err := service.GetUserById(ctx, userId)
+	if err != nil {
+		logger.Logger.Error("Failed to get user.", logger.ErrAttr(err))
+		return err
+	}
+
+	if user.Name != os.Getenv("ADMIN_NAME") {
+		errMsg := fmt.Sprintf("User %d (%s) is not admin.", userId, user.Name)
+		logger.Logger.Error(errMsg, logger.ErrAttr(err))
+		return errors.New(errMsg)
+	}
+	return nil
 }
 
 func getTokenFromAuthorizationHeader(c *gin.Context) string {
