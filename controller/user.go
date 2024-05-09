@@ -12,7 +12,22 @@ import (
 )
 
 func ListUsers(c *gin.Context) {
+	logger.Logger.Debug("ListUsers called.")
+	tokenUserId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
+
 	ctx := c.Request.Context()
+	err = CheckAdminAuthorization(ctx, tokenUserId)
+	if err != nil {
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized"})
+		return
+	}
+
 	users, err := service.GetUsers(ctx)
 	if err != nil {
 		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
@@ -28,6 +43,21 @@ func ListUsers(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	tokenUserId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = CheckAdminAuthorization(ctx, tokenUserId)
+	if err != nil {
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized"})
+		return
+	}
+
 	userIdString := c.Param("user-id")
 	userId, err := strconv.Atoi(userIdString)
 	if err != nil {
@@ -35,7 +65,6 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
 	user, err := service.GetUserById(ctx, userId)
 	if err != nil {
 		logger.Logger.Error("GetUser Failed.", logger.ErrAttr(err))
@@ -51,13 +80,27 @@ func GetUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
+	tokenUserId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = CheckAdminAuthorization(ctx, tokenUserId)
+	if err != nil {
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized"})
+		return
+	}
+
 	var requestBody model.User
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		logger.Logger.Error("CreateUser Failed. Failed to bind request body.", logger.ErrAttr(err))
 		return
 	}
 
-	ctx := c.Request.Context()
 	if err := service.CreateUser(ctx, &requestBody); err != nil {
 		logger.Logger.Error("CreateUser Failed.", logger.ErrAttr(err))
 		return
@@ -67,20 +110,33 @@ func CreateUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
+	tokenUserId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = CheckAdminAuthorization(ctx, tokenUserId)
+	if err != nil {
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized"})
+		return
+	}
+
 	var requestBody model.User
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		logger.Logger.Error("UpdateUser Failed. Failed to bind request body.", logger.ErrAttr(err))
 		return
 	}
 
-	var err error
 	requestBody.Id, err = strconv.Atoi(c.Param("user-id"))
 	if err != nil {
 		logger.Logger.Error("UpdateUser Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
 		return
 	}
 
-	ctx := c.Request.Context()
 	if err := service.UpdateUser(ctx, &requestBody); err != nil {
 		logger.Logger.Error("UpdateUser Failed.", logger.ErrAttr(err))
 		return
@@ -90,13 +146,27 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
+	tokenUserId, err := ValidateTokenAndGetUserId(c)
+	if err != nil {
+		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = CheckAdminAuthorization(ctx, tokenUserId)
+	if err != nil {
+		logger.Logger.Error("ListUsers Failed.", logger.ErrAttr(err))
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized"})
+		return
+	}
+
 	userId, err := strconv.Atoi(c.Param("user-id"))
 	if err != nil {
 		logger.Logger.Error("DeleteUser Failed. Failed to convert userId string to int.", logger.ErrAttr(err))
 		return
 	}
 
-	ctx := c.Request.Context()
 	if err := service.DeleteUser(ctx, userId); err != nil {
 		logger.Logger.Error("DeleteUser Failed.", logger.ErrAttr(err))
 		return

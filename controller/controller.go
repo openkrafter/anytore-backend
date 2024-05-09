@@ -24,29 +24,21 @@ func SampleTraningItem(c *gin.Context) {
 }
 
 func RegisterRoutes(r *gin.Engine) {
+	r.GET("/sample", SampleTraningItem) // for debug
+
 	r.POST("/login", Login)
 
-	r.GET("/sample", SampleTraningItem) // for debug
+	r.GET("/admin/users", ListUsers)
+	r.GET("/admin/users/:user-id", GetUser)
+	r.POST("/admin/users", CreateUser)
+	r.PUT("/admin/users/:user-id", UpdateUser)
+	r.DELETE("/admin/users/:user-id", DeleteUser)
+
 	r.GET("/training-items", ListTraningItem)
 	r.GET("/training-items/:training-item-id", GetTraningItem)
 	r.POST("/training-items", CreateTraningItem)
 	r.PUT("/training-items/:training-item-id", UpdateTraningItem)
 	r.DELETE("/training-items/:training-item-id", DeleteTraningItem)
-}
-
-func RegisterAdminRoutes(r *gin.Engine) {
-	adminGroup := r.Group("/admin")
-	username := os.Getenv("ADMIN_USERNAME")
-	password := os.Getenv("ADMIN_PASSWORD")
-	adminGroup.Use(gin.BasicAuth(gin.Accounts{
-		username: password,
-	}))
-
-	adminGroup.GET("/users", ListUsers)
-	adminGroup.GET("/users/:user-id", GetUser)
-	adminGroup.POST("/users", CreateUser)
-	adminGroup.PUT("/users/:user-id", UpdateUser)
-	adminGroup.DELETE("/users/:user-id", DeleteUser)
 }
 
 func Run() {
@@ -57,7 +49,6 @@ func Run() {
 	setCors(r)
 	setCSP(r)
 	RegisterRoutes(r)
-	RegisterAdminRoutes(r)
 
 	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	if err := r.Run(); err != nil {
@@ -67,27 +58,21 @@ func Run() {
 }
 
 func setCors(r *gin.Engine) {
-	if os.Getenv("GIN_MODE") == "release" {
-		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{os.Getenv("PROD_CORS_ORIGIN")},
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-			MaxAge:           6 * time.Hour,
-		}))
+	config := cors.DefaultConfig()
+	if os.Getenv("CORS_ORIGIN") == "*" {
+		logger.Logger.Debug("CORS setting: allow all origins")
+		config.AllowAllOrigins = true
 	} else {
-		logger.Logger.Debug("CORS setting: debug mode")
-
-		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{os.Getenv("DEV_CORS_ORIGIN")},
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
-			ExposeHeaders:    []string{"Content-Length"},
-			AllowCredentials: true,
-			MaxAge:           6 * time.Hour,
-		}))
+		logger.Logger.Debug("CORS setting: allow specific origin")
+		config.AllowOrigins = []string{os.Getenv("CORS_ORIGIN")}
 	}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = true
+	config.MaxAge = 6 * time.Hour
+
+	r.Use(cors.New(config))
 }
 
 func setCSP(r *gin.Engine) {
