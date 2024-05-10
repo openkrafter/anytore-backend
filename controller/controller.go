@@ -58,12 +58,14 @@ func Run() {
 }
 
 func setCors(r *gin.Engine) {
+	logger.Logger.Debug("Setting CORS.")
 	config := cors.DefaultConfig()
 	if os.Getenv("CORS_ORIGIN") == "*" {
 		logger.Logger.Debug("CORS setting: allow all origins")
 		config.AllowAllOrigins = true
 	} else {
 		logger.Logger.Debug("CORS setting: allow specific origin")
+		logger.Logger.Debug(os.Getenv("CORS_ORIGIN"))
 		config.AllowOrigins = []string{os.Getenv("CORS_ORIGIN")}
 	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
@@ -76,6 +78,7 @@ func setCors(r *gin.Engine) {
 }
 
 func setCSP(r *gin.Engine) {
+	logger.Logger.Debug("Setting CSP.")
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self';")
 		c.Next()

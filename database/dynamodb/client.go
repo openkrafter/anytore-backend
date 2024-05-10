@@ -1,24 +1,15 @@
 package dynamodb
 
-import (
-	"context"
+import "github.com/openkrafter/anytore-backend/logger"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-
-	"github.com/openkrafter/anytore-backend/logger"
-)
-
-var DynamoDbClient *dynamodb.Client
+var DClient DynamoDBService
 
 func InitDynamoDbClient() {
-	logger.Logger.Debug("Init DynamoDB client.")
-
-	cfg, err := config.LoadDefaultConfig(context.Background())
+	var err error
+	DClient, err = NewDynamoDBClient()
 	if err != nil {
-		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
-		panic("Failed to start anytore.")
+		errMsg := "Failed to init DynamoDBClient."
+		logger.Logger.Error(errMsg, logger.ErrAttr(err))
+		panic(errMsg)
 	}
-
-	DynamoDbClient = dynamodb.NewFromConfig(cfg)
 }
