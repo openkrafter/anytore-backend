@@ -1,0 +1,24 @@
+version: "3"
+services:
+  anytore-backend:
+    image: anytore/backend:latest
+    networks:
+      - anytore-net
+    ports:
+      - "8082:80"
+    restart: always
+    environment:
+      # - LOG_LEVEL=debug
+      # - GIN_MODE=debug
+      - DB_USER=develop
+      - DB_PASSWORD=example
+      - DB_HOST=user-db
+      - DYNAMODB=local
+      - LOCAL_DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - TOKEN_SECRET=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      - CORS_ORIGIN=*
+      - ADMIN_NAME=localadmin
+
+networks:
+  anytore-net:
+    driver: bridge
