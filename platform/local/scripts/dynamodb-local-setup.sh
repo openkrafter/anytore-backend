@@ -1,6 +1,7 @@
 #!/bin/sh
 
 aws dynamodb create-table \
+  --no-cli-pager \
   --endpoint-url http://localhost:8000 \
   --table-name TrainingItem \
   --attribute-definitions AttributeName=Id,AttributeType=N AttributeName=UserId,AttributeType=N \
@@ -26,6 +27,7 @@ aws dynamodb create-table \
     ]'
 
 aws dynamodb create-table \
+  --no-cli-pager \
   --endpoint-url http://localhost:8000 \
   --table-name TrainingItemCounter \
   --attribute-definitions AttributeName=CountKey,AttributeType=S \
