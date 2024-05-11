@@ -24,7 +24,9 @@ jobs:
           version: v1.57.2
 
       - name: Start Docker Compose
-        run: docker-compose -f platform/local/docker-compose-database.yml up -d
+        run: |
+          docker-compose -f platform/local/docker-compose-database.yml up -d
+          sleep 10
 
       - name: Set dummy AWS credentials
         run: |

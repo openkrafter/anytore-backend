@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # MySQL connection details
-# DB_HOST="127.0.0.1"
-DB_HOST="user-db"
+DB_HOST="127.0.0.1"
+# DB_HOST="user-db"
 DB_USER="develop"
 DB_PASSWORD="example"
 DB_NAME="anytore"
