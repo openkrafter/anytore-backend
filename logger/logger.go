@@ -11,6 +11,10 @@ type LogConfig struct {
 	LOG_LEVEL string `yaml:"LOG_LEVEL"`
 }
 
+func Attr(key string, value interface{}) slog.Attr {
+	return slog.Any(key, value)
+}
+
 func ErrAttr(err error) slog.Attr {
 	return slog.Any("error", err)
 }
