@@ -2,16 +2,22 @@ version: "3"
 services:
   dynamodb-local:
     image: amazon/dynamodb-local
+    networks:
+      - anytore-net
+    ports:
+      - "8000:8000"
     restart: always
     user: root
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data"
     volumes:
       - dynamodb-local-data:/home/dynamodblocal/data
-    ports:
-      - "8000:8000"
 
   user-db:
     image: mysql:8.0
+    networks:
+      - anytore-net
+    ports:
+      - "3306:3306"
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
@@ -21,8 +27,32 @@ services:
       MYSQL_PASSWORD: example
     volumes:
       - user-db-data:/var/lib/mysql
+
+  anytore-backend:
+    image: anytore/backend:latest
+    networks:
+      - anytore-net
     ports:
-      - 3306:3306
+      - "8082:80"
+    restart: always
+    environment:
+      # - LOG_LEVEL=debug
+      # - GIN_MODE=debug
+      - DB_USER=develop
+      - DB_PASSWORD=example
+      - DB_HOST=user-db
+      - DYNAMODB=local
+      - LOCAL_DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - TOKEN_SECRET=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      - CORS_ORIGIN=*
+      - ADMIN_NAME=localadmin
+    depends_on:
+      - dynamodb-local
+      - user-db
+
+networks:
+  anytore-net:
+    driver: bridge
 
 volumes:
   dynamodb-local-data: {}

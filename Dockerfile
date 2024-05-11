@@ -1,47 +1,26 @@
 # For build
-FROM golang:1.21.5
+FROM golang:1.21.5-alpine3.19 AS builder
 
-## update packages
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN apk update \
+    && apk add --no-cache git gcc g++ \
+    && apk upgrade \
+    && rm -rf /var/cache/apk/*
 
-## install packages
-### -
-
-## build application
-RUN mkdir -p /go/src/anytore-backend
-COPY ./ /go/src/anytore-backend/
-
-WORKDIR /go/src/anytore-backend
-RUN go build cmd/anytore-backend/main.go
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o /app/main ./cmd/anytore-backend/
 
 
 # For release
-FROM golang:1.21.5
+FROM alpine:3.19
+COPY --from=builder /app/main /app/main
 
-## update packages
-RUN apt-get update
-RUN apt-get upgrade -y
+ENV LOG_LEVEL=info \
+    GIN_MODE=release \
+    PORT=80 \
+    AWS_REGION=ap-northeast-1
 
-## release application
-COPY --from=0 /go/src/anytore-backend/main /root/
-
-## environment variable
-### anytore
-#### LOG_LEVEL: info or debug
-ENV LOG_LEVEL info
-
-### Gin
-#### GIN_MODE: release or debug
-ENV GIN_MODE release
-
-ENV PORT 80
-
-### AWS
-#### AWS_REGION: ap-northeast-1 or us-east-1 or ...
-ENV AWS_REGION ap-northeast-1
-
-## Dockerfile common
 EXPOSE 80
-
-CMD /root/main
+CMD ["/app/main"]

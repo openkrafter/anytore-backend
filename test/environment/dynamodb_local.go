@@ -3,44 +3,28 @@ package testenvironment
 import (
 	"context"
 	"log"
-	"net/url"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	smithyendpoints "github.com/aws/smithy-go/endpoints"
 	anytoreDynamodb "github.com/openkrafter/anytore-backend/database/dynamodb"
 	"github.com/openkrafter/anytore-backend/logger"
 	"github.com/openkrafter/anytore-backend/model"
 )
 
-type resolverV2 struct{}
-
-func (*resolverV2) ResolveEndpoint(ctx context.Context, params dynamodb.EndpointParameters) (
-	smithyendpoints.Endpoint, error,
-) {
-	u, err := url.Parse("http://localhost:8000")
-	if err != nil {
-		return smithyendpoints.Endpoint{}, err
-	}
-	return smithyendpoints.Endpoint{
-		URI: *u,
-	}, nil
-}
-
 func SetupDynamoDbClient() error {
-	cfg, err := config.LoadDefaultConfig(context.Background())
+	os.Setenv("DYNAMODB", "local")
+	os.Setenv("LOCAL_DYNAMODB_ENDPOINT", "http://localhost:8000")
 
+	var err error
+	anytoreDynamodb.DClient, err = anytoreDynamodb.NewDynamoDBClient()
 	if err != nil {
-		logger.Logger.Error("Load aws config error.", logger.ErrAttr(err))
+		errMsg := "Failed to init DynamoDBClient."
+		logger.Logger.Error(errMsg, logger.ErrAttr(err))
 		return err
 	}
-
-	anytoreDynamodb.DynamoDbClient = dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
-		o.EndpointResolverV2 = &resolverV2{}
-	})
 
 	return nil
 }
@@ -51,7 +35,7 @@ func SetupTraningItemTestData(input *model.TrainingItem) error {
 	if err != nil {
 		return err
 	}
-	_, err = anytoreDynamodb.DynamoDbClient.PutItem(context.Background(), &dynamodb.PutItemInput{
+	_, err = anytoreDynamodb.DClient.PutItem(context.Background(), &dynamodb.PutItemInput{
 		TableName: aws.String(tableName),
 		Item:      av,
 	})
@@ -68,7 +52,7 @@ func SetupTraningItemCounterTestData(input *model.TrainingItem) error {
 	if err != nil {
 		return err
 	}
-	_, err = anytoreDynamodb.DynamoDbClient.PutItem(context.Background(), &dynamodb.PutItemInput{
+	_, err = anytoreDynamodb.DClient.PutItem(context.Background(), &dynamodb.PutItemInput{
 		TableName: aws.String(tableName),
 		Item:      av,
 	})
@@ -96,7 +80,7 @@ func deleteAllItems(tableName string, keyName string) {
 	params := &dynamodb.ScanInput{
 		TableName: aws.String(tableName),
 	}
-	deleteItems, err := anytoreDynamodb.DynamoDbClient.Scan(context.Background(), params)
+	deleteItems, err := anytoreDynamodb.DClient.Scan(context.Background(), params)
 	if err != nil {
 		logger.Logger.Error("Failed to scan items.", logger.ErrAttr(err))
 		return
@@ -111,7 +95,7 @@ func deleteAllItems(tableName string, keyName string) {
 			},
 		}
 
-		_, err := anytoreDynamodb.DynamoDbClient.DeleteItem(context.Background(), deleteParams)
+		_, err := anytoreDynamodb.DClient.DeleteItem(context.Background(), deleteParams)
 		if err != nil {
 			logger.Logger.Error("Failed to delete item.", logger.ErrAttr(err))
 			return
