@@ -41,23 +41,7 @@ func RegisterRoutes(r *gin.Engine) {
 	r.DELETE("/training-items/:training-item-id", DeleteTraningItem)
 }
 
-func Run() {
-	logger.Logger.Info("Controller thread start.")
-
-	r := gin.Default()
-
-	setCors(r)
-	setCSP(r)
-	RegisterRoutes(r)
-
-	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-	if err := r.Run(); err != nil {
-		logger.Logger.Error("Failed to start the server.", logger.ErrAttr(err))
-		return
-	}
-}
-
-func setCors(r *gin.Engine) {
+func SetCors(r *gin.Engine) {
 	logger.Logger.Debug("Setting CORS.")
 	config := cors.DefaultConfig()
 	if os.Getenv("CORS_ORIGIN") == "*" {
@@ -77,10 +61,26 @@ func setCors(r *gin.Engine) {
 	r.Use(cors.New(config))
 }
 
-func setCSP(r *gin.Engine) {
+func SetCSP(r *gin.Engine) {
 	logger.Logger.Debug("Setting CSP.")
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self';")
 		c.Next()
 	})
+}
+
+func Run() {
+	logger.Logger.Info("Controller thread start.")
+
+	r := gin.Default()
+
+	SetCors(r)
+	SetCSP(r)
+	RegisterRoutes(r)
+
+	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	if err := r.Run(); err != nil {
+		logger.Logger.Error("Failed to start the server.", logger.ErrAttr(err))
+		return
+	}
 }

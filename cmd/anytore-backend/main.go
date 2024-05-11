@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/openkrafter/anytore-backend/auth"
 	"github.com/openkrafter/anytore-backend/config"
 	"github.com/openkrafter/anytore-backend/controller"
@@ -10,6 +12,8 @@ import (
 	"github.com/openkrafter/anytore-backend/database/sqldb"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func main() {
@@ -25,5 +29,9 @@ func main() {
 
 	auth.InitPassHasher()
 
-	controller.Run()
+	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") == "" {
+		controller.Run()
+	} else {
+		lambda.Start(controller.Handler)
+	}
 }
