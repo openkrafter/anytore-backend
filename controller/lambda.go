@@ -38,13 +38,13 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Method", httpReq.Method))
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq URL", httpReq.URL))
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Header", httpReq.Header))
-	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Body", httpReq.Body))
+	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Body", bodyReader.String()))
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, httpReq)
 	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Code", w.Code))
 	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Header", w.Header()))
-	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Body", w.Body))
+	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Body", w.Body.String()))
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: w.Code,
