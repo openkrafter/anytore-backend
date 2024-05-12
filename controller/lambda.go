@@ -27,11 +27,16 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 		logger.Logger.Error("Failed to create HTTP request", logger.ErrAttr(err))
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
 	}
-	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq", httpReq))
+	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Method", httpReq.Method))
+	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq URL", httpReq.URL))
+	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Header", httpReq.Header))
+	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Body", httpReq.Body))
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, httpReq)
-	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp", w))
+	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Code", w.Code))
+	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Header", w.Header()))
+	logger.Logger.Debug("HTTP request processed", logger.Attr("httpResp Body", w.Body))
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: w.Code,
