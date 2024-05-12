@@ -22,11 +22,19 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	SetCSP(r)
 	RegisterRoutes(r)
 
-	httpReq, err := http.NewRequest(req.HTTPMethod, req.Path, bytes.NewBufferString(req.Body))
+	bodyReader := bytes.NewBufferString(req.Body)
+	httpReq, err := http.NewRequest(req.HTTPMethod, req.Path, bodyReader)
 	if err != nil {
 		logger.Logger.Error("Failed to create HTTP request", logger.ErrAttr(err))
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
 	}
+
+	for key, values := range req.MultiValueHeaders {
+		for _, value := range values {
+			httpReq.Header.Add(key, value)
+		}
+	}
+
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Method", httpReq.Method))
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq URL", httpReq.URL))
 	logger.Logger.Debug("HTTP request created", logger.Attr("httpReq Header", httpReq.Header))
