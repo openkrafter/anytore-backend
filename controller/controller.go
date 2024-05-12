@@ -58,6 +58,10 @@ func SetCors(r *gin.Engine) {
 	config.AllowCredentials = true
 	config.MaxAge = 6 * time.Hour
 
+	r.OPTIONS("/*any", func(c *gin.Context) {
+		c.AbortWithStatus(http.StatusOK)
+	})
+
 	r.Use(cors.New(config))
 }
 
