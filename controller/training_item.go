@@ -12,12 +12,15 @@ import (
 )
 
 func ListTraningItem(c *gin.Context) {
+	logger.Logger.Debug("ListTraningItem called.")
+
 	userId, err := ValidateTokenAndGetUserId(c)
 	if err != nil {
 		logger.Logger.Error("Token Error.", logger.ErrAttr(err))
 		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authenticated"})
 		return
 	}
+	logger.Logger.Debug("ListTraningItem userId", logger.Attr("userId", userId))
 
 	ctx := c.Request.Context()
 	trainingItems, err := service.GetTraningItems(ctx, userId)
@@ -30,6 +33,8 @@ func ListTraningItem(c *gin.Context) {
 		c.JSON(error404.ErrorCode, error404.Body)
 		return
 	}
+	logger.Logger.Debug("ListTraningItem trainingItems", logger.Attr("trainingItems", trainingItems))
+
 	c.JSON(http.StatusOK, trainingItems)
 }
 

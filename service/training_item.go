@@ -18,6 +18,8 @@ import (
 )
 
 func GetTraningItems(ctx context.Context, userId int) ([]*model.TrainingItem, error) {
+	logger.Logger.Debug("GetTraningItems process", logger.Attr("userId", userId))
+
 	basics, err := NewTableBasics("TrainingItem")
 	if err != nil {
 		logger.Logger.Error("DynamoDB client init error.", logger.ErrAttr(err))
@@ -52,6 +54,7 @@ func GetTraningItems(ctx context.Context, userId int) ([]*model.TrainingItem, er
 		IndexName:                 aws.String("UserIdIndex"),
 	}
 
+	logger.Logger.Debug("Get TraningItems.")
 	response, err := basics.DynamoDbClient.Query(ctx, queryInput)
 	if err != nil {
 		logger.Logger.Error("Failed to get TrainingItems.", logger.ErrAttr(err))
@@ -74,6 +77,7 @@ func GetTraningItems(ctx context.Context, userId int) ([]*model.TrainingItem, er
 		}
 		trainingItems = append(trainingItems, &trainingItem)
 	}
+	logger.Logger.Debug("Success to get TrainingItems.", logger.Attr("TrainingItems", trainingItems))
 
 	return trainingItems, nil
 }
