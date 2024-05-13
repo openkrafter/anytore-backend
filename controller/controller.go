@@ -51,16 +51,12 @@ func SetCors(r *gin.Engine) {
 		logger.Logger.Debug("CORS setting: allow specific origin")
 		logger.Logger.Debug(os.Getenv("CORS_ORIGIN"))
 		config.AllowOrigins = []string{os.Getenv("CORS_ORIGIN")}
+		config.AllowCredentials = true
 	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept"}
 	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
 	config.MaxAge = 6 * time.Hour
-
-	r.OPTIONS("/*any", func(c *gin.Context) {
-		c.AbortWithStatus(http.StatusOK)
-	})
 
 	r.Use(cors.New(config))
 }

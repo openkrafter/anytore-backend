@@ -18,6 +18,7 @@ services:
       - TOKEN_SECRET=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - CORS_ORIGIN=*
       - ADMIN_NAME=localadmin
+      - LOG_LEVEL=debug
 
 networks:
   anytore-net:
