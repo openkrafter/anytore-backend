@@ -39,6 +39,12 @@ func RegisterRoutes(r *gin.Engine) {
 	r.POST("/training-items", CreateTraningItem)
 	r.PUT("/training-items/:training-item-id", UpdateTraningItem)
 	r.DELETE("/training-items/:training-item-id", DeleteTraningItem)
+
+	r.GET("/training-records", ListTrainingRecords)
+	r.GET("/training-records/:training-record-id", GetTrainingRecord)
+	r.POST("/training-records", CreateTrainingRecord)
+	r.PUT("/training-records/:training-record-id", UpdateTrainingRecord)
+	r.DELETE("/training-records/:training-record-id", DeleteTrainingRecord)
 }
 
 func SetCors(r *gin.Engine) {
