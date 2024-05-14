@@ -1,5 +1,5 @@
-<p align="center" style="font-size: 5em; font-weight: 600; font-style: italic; color: #FFD700;">
-  ANYTORE
+<p align="center">
+  <img src="docs/images/anytore-logo.png" alt="ANYTORE Logo" />
 </p>
 
 # Anytore (Backend)
