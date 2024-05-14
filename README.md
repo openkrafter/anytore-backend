@@ -1,3 +1,7 @@
+<p align="center" style="font-size: 5em; font-weight: 600; font-style: italic; color: #FFD700;">
+  ANYTORE
+</p>
+
 # Anytore (Backend)
 
 ## Introduction to Anytore
